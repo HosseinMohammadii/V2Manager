@@ -9,4 +9,6 @@ class SubscriptionAdmin(ModelAdmin):
     list_display = ('__str__', 'link')
 
 
-admin.site.register(MiddleServer)
+@admin.register(MiddleServer)
+class MiddleServerAdmin(ModelAdmin):
+    list_display = ('__str__', 'port', 'active')

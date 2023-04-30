@@ -57,7 +57,7 @@ class Subscription(models.Model):
 
     def get_edited_confs(self):
         mss = []
-        qs = MiddleServer.objects.all()
+        qs = MiddleServer.objects.filter(active=True)
         for ms in qs:
             mss.append((ms.address, ms.port))
         all = []
@@ -85,3 +85,7 @@ class Subscription(models.Model):
 class MiddleServer(models.Model):
     address = models.CharField(max_length=128)
     port = models.CharField(max_length=16)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.address + ' - ' + str(self.id)
