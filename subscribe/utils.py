@@ -23,9 +23,11 @@ def get_edited_confs(confs:list, servers: list):
             if prop_key in added_props:
                 continue
             for serv, port in servers:
+                smid = int(len(serv)/2)
+                serv_id = ':'.join((serv[:2], serv[smid-1:smid+1], serv[-2:]))
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["ps"] += " Depart"+serv[-2:]
+                dconf["ps"] += " Depart"+serv_id
                 added_props.add(prop_key)
                 produced.append("vmess://"+str(get_vmess_uri(dconf)))
                 
@@ -35,15 +37,16 @@ def get_edited_confs(confs:list, servers: list):
             if prop_key in added_props:
                 continue
             for serv, port in servers:
+                smid = int(len(serv)/2)
+                serv_id = ':'.join((serv[:2], serv[smid-1:smid+1], serv[-2:]))
                 dconf["add"] = serv
                 dconf["port"] = port
                 try:
-                    dconf["serviceName"] += "Depart" + serv[-2:]
+                    dconf["serviceName"] += "Depart" + serv_id
                 except:
-                    dconf["serviceName"] = "Depart" + serv[-2:]
-
+                    pass
                 try:
-                    dconf["path"] += "Depart" + serv[-2:]
+                    dconf["path"] += "Depart" + serv_id
                 except:
                     pass
                 added_props.add(prop_key)
@@ -55,15 +58,16 @@ def get_edited_confs(confs:list, servers: list):
             if prop_key in added_props:
                 continue
             for serv, port in servers:
+                smid = int(len(serv)/2)
+                serv_id = ':'.join((serv[:2], serv[smid-1:smid+1], serv[-2:]))
                 dconf["add"] = serv
                 dconf["port"] = port
                 try:
-                    dconf["serviceName"] += "Depart"+serv[-2:]
+                    dconf["serviceName"] += "Depart"+serv_id
                 except:
-                    dconf["serviceName"] = "Depart" + serv[-2:]
-
+                    pass
                 try:
-                    dconf["path"] += "Depart" + serv[-2:]
+                    dconf["path"] += "Depart" + serv_id
                 except:
                     pass
                 added_props.add(prop_key)
