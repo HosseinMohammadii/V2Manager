@@ -64,7 +64,6 @@ class Subscription(models.Model):
         if self.base_link1:
             original_confs = get_original_confs(self.base_link1)
             edited_confs = get_edited_confs(original_confs, mss)
-            print(edited_confs)
             all += original_confs+edited_confs
         if self.base_link2:
             all += get_original_confs(self.base_link2)
