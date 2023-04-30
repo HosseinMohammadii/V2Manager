@@ -6,12 +6,11 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from hurry.filesize import size
 
-
 import requests
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.http import require_safe
-
+from persiantools.jdatetime import JalaliDate
 
 from .models import Subscription
 
@@ -36,8 +35,11 @@ class Info(View):
     def get(self, request, *args, **kwargs):
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
-        traffic = size(subs.get_traffic(), system=my_size_system)
-        return render(request, 'info.html', {"traffic": traffic})
+        used_traffic = size(subs.get_traffic(), system=my_size_system)
+        return render(request, 'info.html',
+                      {"used_traffic": used_traffic,
+                       "traffic": subs.traffic,
+                       "jalali_expiredate": JalaliDate(subs.expire_date).strftime("%Y/%m/%d")})
 
 
 class Confs(View):
@@ -52,6 +54,7 @@ class Confs(View):
         ressss = subs.get_edited_confs_uri()
         return HttpResponse(ressss)
         # return render(request, 'info.html', {"conf_text": conf_text})
+
 
 from .forms import LoginForm
 

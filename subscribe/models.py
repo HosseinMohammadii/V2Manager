@@ -2,6 +2,7 @@ import base64
 import uuid
 
 import requests
+from django.conf import settings
 from django.db import models
 
 from subscribe.utils import get_original_confs, get_edited_confs
@@ -13,6 +14,16 @@ class Subscription(models.Model):
     base_link2 = models.URLField(max_length=1024, blank=True, null=True)
     base_link3 = models.URLField(max_length=1024, blank=True, null=True)
     user_name = models.CharField(max_length=256)
+    traffic = models.IntegerField(default=0, help_text="In gigabytes")
+    expire_date = models.DateField(auto_now=True)
+    created = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return ' - '.join((self.user_name, str(self.id)))
+
+    @property
+    def link(self):
+        return settings.SERVER_ADDRESS + "subs/land/" + str(self.identifier)
 
     def get_traffic(self):
         tr = 0
