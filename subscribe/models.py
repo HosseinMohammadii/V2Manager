@@ -22,7 +22,7 @@ class Subscription(models.Model):
     base_link3 = models.URLField(max_length=1024, blank=True, null=True)
     user_name = models.CharField(max_length=256)
     traffic = models.IntegerField(default=0, help_text="In gigabytes")
-    expire_date = models.DateField(auto_now=True)
+    expire_date = models.DateField(null=True)
     created = models.DateTimeField(auto_now=True)
 
     def __str__(self):
