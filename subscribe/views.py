@@ -3,6 +3,8 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from hurry.filesize import size
 
@@ -11,6 +13,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.http import require_safe
 from persiantools.jdatetime import JalaliDate
+
+from sesame.utils import get_token, get_query_string, get_user as sesame_get_user
 
 from .models import Subscription
 
@@ -24,45 +28,55 @@ my_size_system = [
 ]
 
 
-class FirstPage(View):
+class FirstPage(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
-        return render(request, 'land.html', {'user_name': subs.user_name})
+        if request.user.id != subs.owner.id:
+            raise PermissionDenied
+        auth_query_string = get_query_string(subs.owner, 'subs')
+        return render(request, 'land.html', {'user_name': subs.user_name,
+                                             'auth_query_string': auth_query_string})
 
 
-class Info(View):
+class Info(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
+        if request.user.id != subs.owner.id:
+            raise PermissionDenied
         used_traffic = size(subs.get_traffic(), system=my_size_system)
         return render(request, 'info.html',
                       {"used_traffic": used_traffic,
                        "traffic": subs.traffic,
                        "jalali_expiredate": JalaliDate(subs.expire_date).strftime("%Y/%m/%d")})
 
-
 class Confs(View):
     def get(self, request, *args, **kwargs):
+
+        user = sesame_get_user(request, scope='subs')
+        if user is None:
+            raise PermissionDenied
+
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
-        all_conf = subs.get_original_confs()
-        # print(all_conf)
-        # for c in all_conf:
-        #     print(c)
-
+        print(user, subs.owner)
+        if user.id != subs.owner.id:
+            raise PermissionDenied
         ressss = subs.get_edited_confs_uri()
         return HttpResponse(ressss)
-        # return render(request, 'info.html', {"conf_text": conf_text})
 
 
-from .forms import LoginForm
+from .forms import BaseLoginForm, LoginForm
 
 
 def login_view(request):
     if request.method == 'GET':
-        form = LoginForm()
-        return render(request, 'login.html', {'form': form})
+        form = BaseLoginForm()
+        form2 = LoginForm()
+        return render(request, 'login.html', {'form': form,
+                                              'form2': form2,
+                                              'resume': request.GET.get('next')})
 
     elif request.method == 'POST':
         form = LoginForm(request.POST)
@@ -70,12 +84,14 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            resume = form.cleaned_data['resume']
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
                 messages.success(request, f'Hi {username.title()}, welcome back!')
-                return redirect('posts')
+                return redirect(resume)
 
         # form is not valid or user is not authenticated
-        messages.error(request, f'Invalid username or password')
+        messages.error(request, f'نام کاربری یا رمز عبور اشتباه است. لطفا دوباره تلاش کنید.'
+                                f'در صورت ادامه مشکل به پشتیبانی مراجعه کنید.')
         return render(request, 'login.html', {'form': form})

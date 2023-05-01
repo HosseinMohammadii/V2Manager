@@ -1,11 +1,24 @@
 
 
+<div style="text-align: center">
+
 {% block content %}
 <form method="POST" novalidate>
 	{% csrf_token %}
-	<h2>Login</h2>
+	<h2 style="direction: rtl">برای ادامه و دسترسی به حساب لطفا از نام کاربری و رمز عبور خود استفاده کنید.</h2>
 	{{form.as_p}}
+    <input type="text" name="resume" hidden="hidden" id="resume" value="{{ resume }}">
 	<input type="submit" value="Login" />
 </form>
 
 {% endblock content%}
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li style="color: crimson" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+</div>

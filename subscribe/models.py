@@ -5,10 +5,17 @@ import requests
 from django.conf import settings
 from django.db import models
 
+from django.contrib.auth.models import User
+
 from subscribe.utils import get_original_confs, get_edited_confs
 
 
 class Subscription(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True
+    )
     identifier = models.UUIDField(default=uuid.uuid4, editable=True)
     base_link1 = models.URLField(max_length=1024)
     base_link2 = models.URLField(max_length=1024, blank=True, null=True)
@@ -88,3 +95,5 @@ class MiddleServer(models.Model):
 
     def __str__(self):
         return self.address + ' - ' + str(self.id)
+
+# class Token(models.Model):
