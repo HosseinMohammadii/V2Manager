@@ -2,7 +2,7 @@ import base64
 import json
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -30,21 +30,27 @@ my_size_system = [
 
 class FirstPage(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, "forbidden.html", status=403)
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
         if request.user.id != subs.owner.id:
-            raise PermissionDenied
+            return render(request, "forbidden.html", status=403)
         auth_query_string = get_query_string(subs.owner, 'subs')
         return render(request, 'land.html', {'user_name': subs.user_name,
                                              'auth_query_string': auth_query_string})
 
 
 class Info(LoginRequiredMixin, View):
+    raise_exception = False
     def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, "forbidden.html", status=403)
+
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
         if request.user.id != subs.owner.id:
-            raise PermissionDenied
+            return render(request, "forbidden.html", status=403)
         used_traffic = size(subs.get_traffic(), system=my_size_system)
         return render(request, 'info.html',
                       {"used_traffic": used_traffic,
@@ -93,5 +99,9 @@ def login_view(request):
 
         # form is not valid or user is not authenticated
         messages.error(request, f'نام کاربری یا رمز عبور اشتباه است. لطفا دوباره تلاش کنید.'
-                                f'در صورت ادامه مشکل به پشتیبانی مراجعه کنید.')
+                                f'در صورت ادامه مشکل با پشتیبانی تماس بگیرید.')
         return render(request, 'login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect(request.GET.get('next'))

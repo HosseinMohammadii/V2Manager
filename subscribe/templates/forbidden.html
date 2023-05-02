@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forbidden</title>
+</head>
+<body>
+<h1 style="text-align: center"> 403 Forbidden</h1>
+<br><br>
+<h2 style="text-align: center"> برای ورود به حساب کاربری دیگر روی لینک پایین کلیک کنید</h2>
+<p style="text-align: center"><a style="text-align: center" id="logout">ورود به حساب کاربری</a></p>
+<script>
+    const path = (new URL(window.location.href)).pathname
+    document.getElementById("logout").href = "/subs/login?next="+path;
+</script>
+</body>
+</html>
