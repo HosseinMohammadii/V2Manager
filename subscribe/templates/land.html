@@ -15,7 +15,7 @@
 <br><br>
 <div style="text-align: center;cursor: pointer; color:  #2874a6 ">
     <h2>
-        <u><p id="android-confs">دریافت تنظیمات اندروید</p></u>
+        <u><p id="android-confs">دریافت تنظیمات اندروید (کلیک کنید)</p></u>
     </h2>
 </div>
 
@@ -23,7 +23,7 @@
 
 <div style="text-align: center;cursor: pointer; color:  #2874a6 ">
     <h2>
-        <u><p id="iphone-confs">دریافت لینک آیفون</p></u>
+        <u><p id="iphone-confs"> دریافت لینک آیفون (کلیک کنید)</p></u>
     </h2>
 </div>
 
@@ -66,7 +66,7 @@
     }
     let update_link = function (input_confs){
         {#update_android_confs(confs)#}
-        confs_url = window.location.href + "{{ confs_url }}"
+        confs_url = window.location.origin + "{{ confs_url }}"
         confs = input_confs.data
     }
     axios.get("{{ confs_url }}")
