@@ -34,7 +34,7 @@
     document.getElementById("logout").href = "/subs/logout";
 
     let confs = "";
-    let confs_url = "{{ confs_url }}"
+    let confs_url = window.location.origin + "{{ confs_url }}"
 
     let android_copy_confs_clipboard = function() {
         navigator.clipboard.writeText(confs).then(function () {
@@ -66,7 +66,6 @@
     }
     let update_link = function (input_confs){
         {#update_android_confs(confs)#}
-        confs_url = window.location.origin + "{{ confs_url }}"
         confs = input_confs.data
     }
     axios.get("{{ confs_url }}")
