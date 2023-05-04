@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>{{ user_name }}</title>
@@ -12,12 +13,65 @@
 <br><br>
 <div style="text-align: center;"><h2><a href="info/">اطلاعات حساب شما</a></h2></div>
 <br><br>
-<div style="text-align: center;"><h2><a href="confs/{{ auth_query_string }}">دریافت تنظیمات</a></h2></div>
+<div style="text-align: center;cursor: pointer; color:  #2874a6 ">
+    <h2>
+        <u><p id="android-confs">دریافت تنظیمات اندروید</p></u>
+    </h2>
+</div>
+
+<br>
+
+<div style="text-align: center;cursor: pointer; color:  #2874a6 ">
+    <h2>
+        <u><p id="iphone-confs">دریافت لینک آیفون</p></u>
+    </h2>
+</div>
+
 <br><br>
 <h3 style="text-align: center"><a style="text-align: center" id="logout">خارج شدن از حساب کاربری</a></h3>
 <script>
     const path = (new URL(window.location.href)).pathname
     document.getElementById("logout").href = "/subs/logout";
+
+    let confs = "";
+    let confs_url = "{{ confs_url }}"
+
+    let android_copy_confs_clipboard = function() {
+        navigator.clipboard.writeText(confs).then(function () {
+            console.log('Async: Copying to clipboard was successful!');
+            console.log(confs)
+            alert("تنظیمات با موفقیت کپی شد");
+        }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+        });
+    }
+
+        let iphone_copy_url_clipboard = function() {
+        navigator.clipboard.writeText(confs_url).then(function () {
+            console.log('Async: Copying to clipboard was successful!');
+            alert("لینک تنظیمات با موفقیت کپی شد");
+        }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById("android-confs").addEventListener("click", android_copy_confs_clipboard);
+    document.getElementById("iphone-confs").addEventListener("click", iphone_copy_url_clipboard);
+
+
+
+
+    let update_android_confs = function (confs){
+        document.getElementById("")
+    }
+    let update_link = function (input_confs){
+        {#update_android_confs(confs)#}
+        confs = input_confs.data
+    }
+    axios.get("{{ confs_url }}")
+    .then((response) => update_link(response)).catch((error) => console.log(error));
+
+
 </script>
 </body>
 </html>

@@ -18,6 +18,8 @@ from sesame.utils import get_token, get_query_string, get_user as sesame_get_use
 
 from .models import Subscription
 
+from .forms import BaseLoginForm, LoginForm
+
 my_size_system = [
     (1024 ** 5, ' Megamanys'),
     (1024 ** 4, ' ترابایت'),
@@ -37,12 +39,15 @@ class FirstPage(LoginRequiredMixin, View):
         if request.user.id != subs.owner.id:
             return render(request, "forbidden.html", status=403)
         auth_query_string = get_query_string(subs.owner, 'subs')
+        confs_url = request.get_full_path()+"confs/"+auth_query_string
         return render(request, 'land.html', {'user_name': subs.user_name,
-                                             'auth_query_string': auth_query_string})
+                                             'auth_query_string': auth_query_string,
+                                             "confs_url": confs_url})
 
 
 class Info(LoginRequiredMixin, View):
     raise_exception = False
+
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return render(request, "forbidden.html", status=403)
@@ -56,6 +61,7 @@ class Info(LoginRequiredMixin, View):
                       {"used_traffic": used_traffic,
                        "traffic": subs.traffic,
                        "jalali_expiredate": JalaliDate(subs.expire_date).strftime("%Y/%m/%d")})
+
 
 class Confs(View):
     def get(self, request, *args, **kwargs):
@@ -71,9 +77,6 @@ class Confs(View):
             raise PermissionDenied
         ressss = subs.get_edited_confs_uri()
         return HttpResponse(ressss)
-
-
-from .forms import BaseLoginForm, LoginForm
 
 
 def login_view(request):
@@ -101,6 +104,7 @@ def login_view(request):
         messages.error(request, f'نام کاربری یا رمز عبور اشتباه است. لطفا دوباره تلاش کنید.'
                                 f'در صورت ادامه مشکل با پشتیبانی تماس بگیرید.')
         return render(request, 'login.html', {'form': form})
+
 
 def logout_view(request):
     logout(request)
