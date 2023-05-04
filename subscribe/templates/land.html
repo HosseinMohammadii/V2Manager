@@ -66,6 +66,7 @@
     }
     let update_link = function (input_confs){
         {#update_android_confs(confs)#}
+        confs_url = window.location.href + "{{ confs_url }}"
         confs = input_confs.data
     }
     axios.get("{{ confs_url }}")
