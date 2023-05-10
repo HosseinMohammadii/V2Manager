@@ -49,10 +49,7 @@ def get_edited_confs(confs: list, servers: list):
                 serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
                 dconf["add"] = serv
                 dconf["port"] = port
-                if dconf.get("serviceName", None) is not None:
-                    dconf["serviceName"] += " Depart " + serv_id
-                else:
-                    dconf["path"] += " Depart " + serv_id
+                dconf["realName"] += serv_id
                 added_props.add(prop_key)
                 produced.append("vless://" + get_vless_uri(dconf))
 
@@ -64,14 +61,11 @@ def get_edited_confs(confs: list, servers: list):
             for serv, port in servers:
                 dconf = get_trojan_dict(conf.replace("trojan://", ""))
                 smid = int(len(serv) / 2)
-                # serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
-                serv_id = " Delaydar"
+                serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
+                # serv_id = " Delaydar"
                 dconf["add"] = serv
                 dconf["port"] = port
-                if dconf.get("serviceName", None) is not None:
-                    dconf["serviceName"] += " Depart " + serv_id
-                else:
-                    dconf["path"] += " Depart " + serv_id
+                dconf["realName"] += serv_id
                 added_props.add(prop_key)
                 # print(dconf)
                 produced.append("trojan://" + get_trojan_uri(dconf))
@@ -134,10 +128,26 @@ def get_vless_dict(uri: str):
         value = ex.split('=')[1]
         d[key] = value
 
+    if d.get('serviceName', None) is not None:
+        t = d['serviceName'].split("#")
+        d["realName"] = unquote(t[1])
+        d['serviceName'] = t[0]
+    else:
+        t = d['path'].split("#")
+        d["realName"] = unquote(t[1])
+        d['path'] = t[0]
+
     return d
 
 
 def get_vless_uri(d: dict):
+    if d.get('serviceName', None) is not None:
+        d['serviceName'] = d['serviceName'] + "#" + quote(d['realName'])
+    else:
+        d['path'] = d['path'] + "#" + quote(d['realName'])
+
+    del(d['realName'])
+
     base = f"{d['password']}@{d['add']}:{d['port']}"
     del (d['password'])
     del (d['add'])
