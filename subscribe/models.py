@@ -90,7 +90,7 @@ class Subscription(models.Model):
         mss = []
         qs = MiddleServer.objects.filter(active=True)
         for ms in qs:
-            mss.append((ms.address, ms.port))
+            mss.append((ms.address, ms.port, ms.id))
         marzban_visited_servers = []
         all = []
         for l in self.link_set.all():

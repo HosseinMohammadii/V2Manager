@@ -28,10 +28,11 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vmess_" + dconf['net']
             if prop_key in added_props:
                 continue
-            for serv, port in servers:
+            for serv, port, idd in servers:
                 dconf = get_vmess_dict(conf.replace("vmess://", ""))
                 smid = int(len(serv) / 2)
                 serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
+                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
                 dconf["ps"] += " Depart " + serv_id
@@ -43,13 +44,14 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vless_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port in servers:
+            for serv, port, idd in servers:
                 dconf = get_vless_dict(conf.replace("vless://", ""))
                 smid = int(len(serv) / 2)
                 serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
+                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] += serv_id
+                dconf["realName"] += " Depart " + serv_id
                 added_props.add(prop_key)
                 produced.append("vless://" + get_vless_uri(dconf))
 
@@ -58,14 +60,14 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "trojan_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port in servers:
+            for serv, port, idd in servers:
                 dconf = get_trojan_dict(conf.replace("trojan://", ""))
                 smid = int(len(serv) / 2)
                 serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
-                # serv_id = " Delaydar"
+                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] += serv_id
+                dconf["realName"] += " Depart " + serv_id
                 added_props.add(prop_key)
                 # print(dconf)
                 produced.append("trojan://" + get_trojan_uri(dconf))
