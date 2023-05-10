@@ -9,3 +9,4 @@ urlpatterns = [
     path("land/<str:id>/confs/", views.Confs.as_view()),
 
 ]
+
