@@ -13,7 +13,7 @@ def get_original_confs_from_subscription(link, ) -> list:
         decoded = base64.b64decode(conf_text).decode('ascii')
         return decoded.split('\n')
     except requests.RequestException:
-        print("Can not get conf from subscription link")
+        print("Can not get conf from subscription link", link)
         return []
 
 

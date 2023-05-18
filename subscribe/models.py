@@ -66,7 +66,7 @@ class Link(models.Model):
     def get_marzban_confs_by_config_id(self):
         url = get_marzban_subs_url(self.server.panel_add, get_marzban_cached_token(self.server),
                                    self.config_id, )
-        url += self.server.panel_add
+        url = self.server.panel_add + url
         return get_original_confs_from_subscription(url)
 
 
