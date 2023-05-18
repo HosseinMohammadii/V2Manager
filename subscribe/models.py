@@ -8,8 +8,9 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from subscribe.tasks import get_marzban_cached_token
-from utils.marzban import get_marzban_traffic, disable_enable_marzban_config
+from utils.cache import get_marzban_cached_token
+from utils.marzban import get_marzban_traffic, disable_enable_marzban_config, get_marzban_traffic_from_api, \
+    get_marzban_subs_url
 from utils.size import gigabyte_to_megabyte, byte_to_megabyte
 from utils.uri import get_original_confs_from_subscription, get_edited_confs
 from utils.xui import get_xui_traffic, disable_enable_xui_config
@@ -100,7 +101,8 @@ class Subscription(models.Model):
         tr = 0
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
-                tr += get_marzban_traffic(l.value)
+                tr += get_marzban_traffic_from_api(l.server.panel_add, get_marzban_cached_token(l.server),
+                                                   l.config_id, )
 
             if l.server.panel == PanelTypes.XUI:
                 tr += get_xui_traffic(l.server.panel_add, l.server.auth, l.config_id)
@@ -137,7 +139,10 @@ class Subscription(models.Model):
         all = []
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
-                all += get_original_confs_from_subscription(l.value)
+                url = get_marzban_subs_url(l.server.panel_add, get_marzban_cached_token(l.server),
+                                           l.config_id, )
+                url += l.server.panel_add
+                all += get_original_confs_from_subscription(url)
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
                 all.append(l.value)
         return all

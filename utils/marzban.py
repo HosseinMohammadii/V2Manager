@@ -33,6 +33,17 @@ def get_marzban_traffic_from_api(add, auth, id):
     return res.json()["used_traffic"]
 
 
+def get_marzban_subs_url(add, auth, id):
+    url = f"{add}/api/user/{id}"
+
+    headers = {
+        "Authorization": "Bearer " + auth,
+        "Accept": "application/json",
+    }
+    res = requests.get(url, headers=headers)
+    return res.json()["subscription_url"]
+
+
 def disable_enable_marzban_config(add, auth, id, action: str):
     url = f"{add}/api/user/{id}"
 
@@ -54,6 +65,8 @@ def disable_enable_marzban_config(add, auth, id, action: str):
 
 
 if __name__ == '__main__':
-    t = get_marzban_token("realshop.novationmarket.com", "hossein", "iran!123")
+    t = get_marzban_token("https://panel1.novationmarket.com", "hossein", "iran!123")
     print("token", t)
-    disable_enable_marzban_config("realshop.novationmarket.com", t, "hooti", "disable")
+    # disable_enable_marzban_config("realshop.novationmarket.com", t, "hooti", "disable")
+    ll = get_marzban_subs_url("https://panel1.novationmarket.com", t, "hooti",)
+    print(ll)

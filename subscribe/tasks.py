@@ -1,20 +1,3 @@
-from datetime import datetime
-
-from utils.size import byte_to_gigabyte
-from utils.marzban import get_marzban_token
-
-
-marzban_token = {}
-
-
-def get_marzban_cached_token(server):
-    t = marzban_token.get(server.panel_add, None)
-    if t is None:
-        t = get_marzban_token(server.panel_add, server.username, server.password)
-        marzban_token[server.panel_add] = t
-    return t
-
-
 def check_and_disable_subs(qs):
     disabled_subs = []
     for sub in qs:
