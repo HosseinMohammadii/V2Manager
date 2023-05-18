@@ -94,7 +94,7 @@ class Subscription(models.Model):
         if self.traffic == 0:
             return 10000
         d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
-        return d
+        return int(d)
 
     def get_used_traffic(self):
         tr = 0
@@ -108,7 +108,7 @@ class Subscription(models.Model):
         return tr
 
     def disable(self):
-        for l in self.link_set:
+        for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
                 disable_enable_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
                                               l.config_id, "disable")

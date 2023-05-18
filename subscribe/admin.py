@@ -47,7 +47,7 @@ class SubscriptionAdmin(ModelAdmin):
                     'status',
                     'remained_days',
                     )
-    readonly_fields = ('link', 'get_original_confs', 'get_edited_confs', 'remained_megabytes')
+    readonly_fields = ('link', 'get_original_confs', 'get_edited_confs', 'remained_days', 'remained_megabytes')
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]
@@ -60,7 +60,7 @@ class FastSubscriptionAdmin(ModelAdmin):
                     'status',
                     'remained_days',
                     )
-    readonly_fields = ('link',)
+    readonly_fields = ('link', 'remained_days')
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]
