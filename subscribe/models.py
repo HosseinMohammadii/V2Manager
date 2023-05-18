@@ -22,6 +22,7 @@ class LinkTypes(models.TextChoices):
     ENCODED = 'Encoded', 'Encoded'
     CLASH = 'Clash', 'Clash'
     URI_LIST = 'URI_List', 'URI_List'
+    BY_CONFIG_ID = 'By Config ID', 'By Config ID'
 
 
 class PanelTypes(models.TextChoices):
@@ -59,7 +60,14 @@ class Link(models.Model):
     config_id = models.CharField(max_length=256, null=True, blank=True, help_text="for xui links")
     server = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, )
     value = models.TextField()
-    type = models.CharField(max_length=64, choices=LinkTypes.choices, default=LinkTypes.SUBSCRIPTION_LINK)
+    type = models.CharField(max_length=64, choices=LinkTypes.choices, default=LinkTypes.BY_CONFIG_ID)
+
+
+    def get_marzban_confs_by_config_id(self):
+        url = get_marzban_subs_url(self.server.panel_add, get_marzban_cached_token(self.server),
+                                   self.config_id, )
+        url += self.server.panel_add
+        return get_original_confs_from_subscription(url)
 
 
 class Subscription(models.Model):
@@ -100,7 +108,7 @@ class Subscription(models.Model):
     def get_used_traffic(self):
         tr = 0
         for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 tr += get_marzban_traffic_from_api(l.server.panel_add, get_marzban_cached_token(l.server),
                                                    l.config_id, )
 
@@ -111,7 +119,7 @@ class Subscription(models.Model):
 
     def disable(self):
         for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 disable_enable_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
                                               l.config_id, "disable")
             if l.server.panel == PanelTypes.XUI:
@@ -138,11 +146,8 @@ class Subscription(models.Model):
     def get_original_confs(self) -> list:
         all = []
         for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
-                url = get_marzban_subs_url(l.server.panel_add, get_marzban_cached_token(l.server),
-                                           l.config_id, )
-                url += l.server.panel_add
-                all += get_original_confs_from_subscription(url)
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
+                all += l.get_marzban_confs_by_config_id()
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
                 all.append(l.value)
         return all
@@ -155,8 +160,10 @@ class Subscription(models.Model):
         marzban_visited_servers = []
         all = []
         for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK and l.server.id not in marzban_visited_servers:
-                original_confs = get_original_confs_from_subscription(l.value)
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID and\
+                    l.server.id not in marzban_visited_servers:
+
+                original_confs = l.get_marzban_confs_by_config_id()
                 if len(original_confs) == 0:
                     continue
                 edited_confs = get_edited_confs(original_confs, mss)
