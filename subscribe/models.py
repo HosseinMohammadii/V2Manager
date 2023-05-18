@@ -92,7 +92,7 @@ class Subscription(models.Model):
     @property
     def remained_megabytes(self):
         if self.traffic == 0:
-            return 100
+            return 10000
         d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
         return d
 
