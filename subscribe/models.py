@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 
 from subscribe.tasks import get_marzban_cached_token
 from utils.marzban import get_marzban_traffic, disable_enable_marzban_config
+from utils.size import gigabyte_to_megabyte, byte_to_megabyte
 from utils.uri import get_original_confs_from_subscription, get_edited_confs
 from utils.xui import get_xui_traffic, disable_enable_xui_config
 
@@ -83,10 +84,19 @@ class Subscription(models.Model):
 
     @property
     def remained_days(self):
-        d = (self.expire_date - datetime.datetime.today()).days
+        if self.expire_date is None:
+            return 100
+        d = (self.expire_date - datetime.date.today()).days
         return d
 
-    def get_traffic(self):
+    @property
+    def remained_megabytes(self):
+        if self.traffic == 0:
+            return 100
+        d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
+        return d
+
+    def get_used_traffic(self):
         tr = 0
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:

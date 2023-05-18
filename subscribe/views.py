@@ -56,7 +56,7 @@ class Info(LoginRequiredMixin, View):
         subs = Subscription.objects.get(identifier=identifier)
         if request.user.id != subs.owner.id:
             return render(request, "forbidden.html", status=403)
-        used_traffic = size(subs.get_traffic(), system=my_size_system)
+        used_traffic = size(subs.get_used_traffic(), system=my_size_system)
         return render(request, 'info.html',
                       {"used_traffic": used_traffic,
                        "traffic": subs.traffic,

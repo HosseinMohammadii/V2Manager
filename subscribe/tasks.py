@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from utils.size import convert_byte_to_gigabyte
+from utils.size import byte_to_gigabyte
 from utils.marzban import get_marzban_token
 
 
@@ -18,14 +18,14 @@ def get_marzban_cached_token(server):
 def check_and_disable_subs(qs):
     disabled_subs = []
     for sub in qs:
-        if datetime.today() > sub.expire_date:
+        if sub.remained_days < 1:
             sub.disable()
             sub.update_status_dis_time()
             disabled_subs.append(sub)
             continue
 
-        tr = sub.get_traffic()
-        if convert_byte_to_gigabyte(tr) > sub.traffic:
+        tr = sub.get_used_traffic()
+        if byte_to_gigabyte(tr) > sub.traffic:
             sub.disable()
             sub.update_status_dis_traffic()
             disabled_subs.append(sub)
