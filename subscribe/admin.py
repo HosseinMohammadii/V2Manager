@@ -12,6 +12,7 @@ class ServerAdmin(ModelAdmin):
 
 class LinkInline(admin.TabularInline):
     model = Link
+    extra = 1
 
 
 @admin.action(description="update subs status and action if needed")
@@ -42,6 +43,19 @@ class SubscriptionAdmin(ModelAdmin):
                     'remained_days',
                     )
     readonly_fields = ('link', 'get_original_confs', 'get_edited_confs', 'remained_megabytes')
+    # readonly_fields = ('link',)
+    inlines = [LinkInline]
+    actions = [update_status, update_status_of_all]
+
+
+@admin.register(Subscription)
+class FastSubscriptionAdmin(ModelAdmin):
+    list_display = ('__str__',
+                    # 'link',
+                    'status',
+                    'remained_days',
+                    )
+    readonly_fields = ('link',)
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]
