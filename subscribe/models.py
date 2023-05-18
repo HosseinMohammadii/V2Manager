@@ -70,7 +70,7 @@ class Subscription(models.Model):
     identifier = models.UUIDField(default=uuid.uuid4, editable=True)
     user_name = models.CharField(max_length=256)
     traffic = models.IntegerField(default=0, help_text="In gigabytes")
-    expire_date = models.DateField(null=True)
+    expire_date = models.DateField(null=True, blank=True)
     created = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=SubscriptionStatuses.choices, default=SubscriptionStatuses.ACTIVE,
                               max_length=32)
