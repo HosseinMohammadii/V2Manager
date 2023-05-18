@@ -82,10 +82,12 @@ WSGI_APPLICATION = 'V2Conf.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+DB_NAME = config('DB_NAME', cast=str)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db2.sqlite3',
+        'NAME': BASE_DIR / DB_NAME,
     }
 }
 
