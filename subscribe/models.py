@@ -1,4 +1,5 @@
 import base64
+import datetime
 import uuid
 
 import requests
@@ -7,9 +8,10 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from utils.marzban import get_marzban_traffic
+from subscribe.tasks import get_marzban_cached_token
+from utils.marzban import get_marzban_traffic, disable_enable_marzban_config
 from utils.uri import get_original_confs_from_subscription, get_edited_confs
-from utils.xui import get_xui_traffic
+from utils.xui import get_xui_traffic, disable_enable_xui_config
 
 
 class LinkTypes(models.TextChoices):
@@ -23,6 +25,14 @@ class LinkTypes(models.TextChoices):
 class PanelTypes(models.TextChoices):
     XUI = "XUI", "XUI"
     MARZBAN = 'Marzban', 'Marzban'
+    XUI_3 = "XUI 3", "XUI 3"
+
+
+class SubscriptionStatuses(models.TextChoices):
+    ACTIVE = "Active", "Active"
+    TIME_EXPIRED = "Time Expired", "Time Expired"
+    TRAFFIC_EXPIRED = "Traffic Expired", "Traffic Expired"
+    DISABLED = "Disabled", "Disabled"
 
 
 class Server(models.Model):
@@ -31,6 +41,9 @@ class Server(models.Model):
     port = models.CharField(max_length=16, default=54321)
     auth = models.CharField(max_length=512, null=True, blank=True)
     panel = models.CharField(max_length=16, choices=PanelTypes.choices, default=PanelTypes.MARZBAN)
+    panel_add = models.URLField(max_length=128, null=True, blank=True)
+    username = models.CharField(max_length=16, null=True, blank=True)
+    password = models.CharField(max_length=16, null=True, blank=True)
 
     def __str__(self):
         return ":".join((str(self.add), self.port))
@@ -58,6 +71,8 @@ class Subscription(models.Model):
     traffic = models.IntegerField(default=0, help_text="In gigabytes")
     expire_date = models.DateField(null=True)
     created = models.DateTimeField(auto_now=True)
+    status = models.CharField(choices=SubscriptionStatuses.choices, default=SubscriptionStatuses.ACTIVE,
+                              max_length=32)
 
     def __str__(self):
         return ' - '.join((self.user_name, str(self.id)))
@@ -66,6 +81,11 @@ class Subscription(models.Model):
     def link(self):
         return settings.SERVER_ADDRESS + "subs/land/" + str(self.identifier)
 
+    @property
+    def remained_days(self):
+        d = (self.expire_date - datetime.datetime.today()).days
+        return d
+
     def get_traffic(self):
         tr = 0
         for l in self.link_set.all():
@@ -73,9 +93,35 @@ class Subscription(models.Model):
                 tr += get_marzban_traffic(l.value)
 
             if l.server.panel == PanelTypes.XUI:
-                tr += get_xui_traffic(l.server.add, l.server.port, l.server.auth, l.config_id)
+                tr += get_xui_traffic(l.server.panel_add, l.server.auth, l.config_id)
 
         return tr
+
+    def disable(self):
+        for l in self.link_set:
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.SUBSCRIPTION_LINK:
+                disable_enable_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
+                                              l.config_id, "disable")
+            if l.server.panel == PanelTypes.XUI:
+                disable_enable_xui_config(l.server.panel_add, l.server.auth,
+                                          l.config_id, "disable")
+
+    def update_status_active(self):
+        self.status = SubscriptionStatuses.ACTIVE
+        self.save()
+
+    def update_status_dis_time(self):
+        self.status = SubscriptionStatuses.TIME_EXPIRED
+        self.save()
+
+    def update_status_dis_traffic(self):
+        self.status = SubscriptionStatuses.TRAFFIC_EXPIRED
+        self.save()
+
+    def update_status_disable(self):
+        self.status = SubscriptionStatuses.DISABLED
+        self.save()
+
     @property
     def get_original_confs(self) -> list:
         all = []
