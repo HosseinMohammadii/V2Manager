@@ -5,6 +5,11 @@ from . models import Subscription, MiddleServer, Link, Server
 from .tasks import check_and_disable_subs
 
 
+class FastSubscription(Subscription):
+
+    class Meta:
+        proxy = True
+
 @admin.register(Server)
 class ServerAdmin(ModelAdmin):
     pass
@@ -48,7 +53,7 @@ class SubscriptionAdmin(ModelAdmin):
     actions = [update_status, update_status_of_all]
 
 
-@admin.register(Subscription)
+@admin.register(FastSubscription)
 class FastSubscriptionAdmin(ModelAdmin):
     list_display = ('__str__',
                     # 'link',
