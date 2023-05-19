@@ -33,7 +33,7 @@ def gigabyte_to_byte(gb):
 
 
 def megabyte_to_byte(gb):
-    return gb / 1024
+    return gb * (1024 ** 2)
 
 
 def gigabyte_to_megabyte(gb):

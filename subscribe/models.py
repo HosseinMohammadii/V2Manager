@@ -110,8 +110,8 @@ class Subscription(models.Model):
         return self.remained_megabytes(self.last_used_traffic)
 
     def remained_megabytes(self, used_tr):
-        if self.traffic == 0:
-            d = 10000
+        if int(self.traffic) == 0:
+            d = 1024 * 60
         else:
             d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(used_tr)
             d = int(d)
