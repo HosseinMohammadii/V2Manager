@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
+from utils.size import pretty_megabyte, pretty_byte
 from . models import Subscription, MiddleServer, Link, Server
 from .tasks import check_and_disable_subs
 
@@ -59,12 +60,22 @@ class FastSubscriptionAdmin(ModelAdmin):
                     # 'link',
                     'status',
                     'remained_days',
-                    'last_used_traffic'
+                    'pretty_remained_traffic'
                     )
-    readonly_fields = ('link', 'remained_days', 'last_used_traffic')
+    readonly_fields = ('link',
+                       'remained_days',
+                       'last_used_traffic',
+                       'pretty_last_used_traffic'
+                       )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]
+
+    def pretty_remained_traffic(self, instance):
+        return pretty_byte(instance.lazy_remained_megabytes)
+
+    def pretty_last_used_traffic(self, instance):
+        return pretty_byte(instance.last_used_traffic)
 
 
 @admin.register(MiddleServer)

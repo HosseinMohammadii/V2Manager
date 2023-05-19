@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from hurry.filesize import size
 
 import requests
 from django.shortcuts import render, redirect
@@ -16,18 +15,12 @@ from persiantools.jdatetime import JalaliDate
 
 from sesame.utils import get_token, get_query_string, get_user as sesame_get_user
 
+from utils.size import pretty_byte
 from .models import Subscription
 
 from .forms import BaseLoginForm, LoginForm
 
-my_size_system = [
-    (1024 ** 5, ' Megamanys'),
-    (1024 ** 4, ' ترابایت'),
-    (1024 ** 3, ' گیگابایت'),
-    (1024 ** 2, ' مگابایت'),
-    (1024 ** 1, ' کیلوبایت'),
-    (1024 ** 0, ' بایت'),
-]
+
 
 
 class FirstPage(LoginRequiredMixin, View):
@@ -56,7 +49,8 @@ class Info(LoginRequiredMixin, View):
         subs = Subscription.objects.get(identifier=identifier)
         if request.user.id != subs.owner.id:
             return render(request, "forbidden.html", status=403)
-        used_traffic = size(subs.get_used_traffic(), system=my_size_system)
+        used_traffic = pretty_byte(subs.get_used_traffic())
+
         return render(request, 'info.html',
                       {"used_traffic": used_traffic,
                        "traffic": subs.traffic,

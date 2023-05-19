@@ -65,8 +65,12 @@ def disable_enable_marzban_config(add, auth, id, action: str):
 
 
 if __name__ == '__main__':
-    t = get_marzban_token("https://panel1.novationmarket.com", "hossein", "iran!123")
+    # t = get_marzban_token("https://panel1.novationmarket.com", "hossein", "iran!123")
+    t = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJob3NzZWluIiwiYWNjZXNzIjoic3VkbyIsImV4cCI6MTY4NDU3MzE2NX0.bwoZDrweaZRr9i_jesHzfn-aGZOXUVVsXeOkCUeVpnA"
     print("token", t)
     # disable_enable_marzban_config("realshop.novationmarket.com", t, "hooti", "disable")
-    ll = get_marzban_subs_url("https://panel1.novationmarket.com", t, "hooti",)
-    print(ll)
+    # ll = get_marzban_subs_url("https://panel1.novationmarket.com", t, "hooti",)
+    # print(ll)
+
+    ut = get_marzban_traffic_from_api("https://panel1.novationmarket.com", t, "nooshin",)
+    print(ut)

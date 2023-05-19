@@ -100,15 +100,26 @@ class Subscription(models.Model):
         return d
 
     @property
-    def remained_megabytes(self):
+    def realtime_remained_megabytes(self):
+        used_tr = self.get_used_traffic()
+        self.update_used_traffic(used_tr)
+        return self.remained_megabytes(used_tr)
+
+    @property
+    def lazy_remained_megabytes(self):
+        return self.remained_megabytes(self.last_used_traffic)
+
+    def remained_megabytes(self, used_tr):
         if self.traffic == 0:
             d = 10000
         else:
-            d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
+            d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(used_tr)
             d = int(d)
-        self.last_used_traffic = d
-        self.save()
         return d
+
+    def update_used_traffic(self, value):
+        self.last_used_traffic = int(value)
+        self.save()
 
     def get_used_traffic(self):
         tr = 0
