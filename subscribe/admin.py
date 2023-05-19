@@ -2,14 +2,14 @@ from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
 from utils.size import pretty_megabyte, pretty_byte
-from . models import Subscription, MiddleServer, Link, Server
+from .models import Subscription, MiddleServer, Link, Server
 from .tasks import check_and_disable_subs
 
 
 class FastSubscription(Subscription):
-
     class Meta:
         proxy = True
+
 
 @admin.register(Server)
 class ServerAdmin(ModelAdmin):
@@ -43,30 +43,44 @@ def update_status_of_all(modeladmin, request, queryset):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(ModelAdmin):
-    list_display = ('__str__',
-                    # 'link',
-                    'status',
-                    'remained_days',
-                    )
-    readonly_fields = ('link', 'get_original_confs', 'get_edited_confs', 'remained_days', 'remained_megabytes')
-    # readonly_fields = ('link',)
+    list_display = (
+        '__str__',
+        'status',
+        'remained_days',
+        'last_used_traffic',
+        'last_check_time',
+    )
+    readonly_fields = (
+        'link',
+        'get_original_confs',
+        'get_edited_confs',
+        'remained_days',
+        'remained_megabytes',
+        'last_check_time',
+    )
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]
 
 
 @admin.register(FastSubscription)
 class FastSubscriptionAdmin(ModelAdmin):
-    list_display = ('__str__',
-                    # 'link',
-                    'status',
-                    'remained_days',
-                    'pretty_remained_traffic'
-                    )
-    readonly_fields = ('link',
-                       'remained_days',
-                       'last_used_traffic',
-                       'pretty_last_used_traffic'
-                       )
+    list_display = (
+        '__str__',
+        # 'link',
+        'status',
+        'remained_days',
+        'pretty_remained_traffic',
+        'pretty_last_used_traffic',
+        'last_check_time',
+    )
+    readonly_fields = (
+        'link',
+        'remained_days',
+        'last_used_traffic',
+        'pretty_last_used_traffic',
+        'pretty_remained_traffic',
+        'last_check_time',
+    )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]

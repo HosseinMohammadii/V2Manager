@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import models
 
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from utils.cache import get_marzban_cached_token
 from utils.marzban import get_marzban_traffic, disable_enable_marzban_config, get_marzban_traffic_from_api, \
@@ -62,7 +63,6 @@ class Link(models.Model):
     value = models.TextField()
     type = models.CharField(max_length=64, choices=LinkTypes.choices, default=LinkTypes.BY_CONFIG_ID)
 
-
     def get_marzban_confs_by_config_id(self):
         url = get_marzban_subs_url(self.server.panel_add, get_marzban_cached_token(self.server),
                                    self.config_id, )
@@ -84,6 +84,7 @@ class Subscription(models.Model):
     status = models.CharField(choices=SubscriptionStatuses.choices, default=SubscriptionStatuses.ACTIVE,
                               max_length=32)
     last_used_traffic = models.IntegerField(default=0)
+    last_check_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return ' - '.join((self.user_name, str(self.id)))
@@ -120,6 +121,11 @@ class Subscription(models.Model):
     def update_used_traffic(self, value):
         self.last_used_traffic = int(value)
         self.save()
+        self.update_last_check_time()
+
+    def update_last_check_time(self):
+        self.last_check_time = timezone.now()
+        self.save()
 
     def get_used_traffic(self):
         tr = 0
@@ -134,6 +140,7 @@ class Subscription(models.Model):
         return tr
 
     def disable(self):
+        ut = self.realtime_remained_megabytes  # just to update used traffic
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 disable_enable_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
@@ -176,7 +183,7 @@ class Subscription(models.Model):
         marzban_visited_servers = []
         all = []
         for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID and\
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID and \
                     l.server.id not in marzban_visited_servers:
 
                 original_confs = l.get_marzban_confs_by_config_id()
