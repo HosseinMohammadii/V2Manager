@@ -9,6 +9,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from subscribe.funcs import get_edited_confs_func
 from utils.cache import get_marzban_cached_token
 from utils.marzban import get_marzban_traffic, disable_enable_marzban_config, get_marzban_traffic_from_api, \
     get_marzban_subs_url
@@ -26,6 +27,12 @@ class LinkTypes(models.TextChoices):
     BY_CONFIG_ID = 'By Config ID', 'By Config ID'
 
 
+class MiddleServerType(models.TextChoices):
+    ARVAN = "Arvan", "Arvan"
+    CLOUDFLARE = "Cloudflare", "Cloudflare"
+    FRAGMENT = "Fragment", "Fragment"
+
+
 class PanelTypes(models.TextChoices):
     XUI = "XUI", "XUI"
     MARZBAN = 'Marzban', 'Marzban'
@@ -39,6 +46,16 @@ class SubscriptionStatuses(models.TextChoices):
     DISABLED = "Disabled", "Disabled"
 
 
+class MiddleServer(models.Model):
+    address = models.CharField(max_length=128)
+    port = models.CharField(max_length=16)
+    active = models.BooleanField(default=True)
+    server_type = models.CharField(max_length=32, choices=MiddleServerType.choices, default=MiddleServerType.FRAGMENT)
+
+    def __str__(self):
+        return self.address + ' - ' + str(self.id)
+
+
 class Server(models.Model):
     add = models.CharField(max_length=128, null=True, blank=True)
     host = models.CharField(max_length=128, null=True, blank=True)
@@ -49,11 +66,19 @@ class Server(models.Model):
     username = models.CharField(max_length=16, null=True, blank=True)
     password = models.CharField(max_length=16, null=True, blank=True)
 
+    middle_servers = models.ManyToManyField(MiddleServer)
+
     def __str__(self):
         return ":".join((str(self.add), self.port))
 
     def __repr__(self):
         return self.__str__()
+
+    def get_mss(self): # suitable for edit confs functions
+        mss = []
+        for ms in self.middle_servers.filter(active=True):
+            mss.append((ms.address, ms.port, ms.id))
+        return mss
 
 
 class Link(models.Model):
@@ -62,6 +87,8 @@ class Link(models.Model):
     server = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, )
     value = models.TextField()
     type = models.CharField(max_length=64, choices=LinkTypes.choices, default=LinkTypes.BY_CONFIG_ID)
+    include_original = models.BooleanField(default=False)
+
 
     def get_marzban_confs_by_config_id(self):
         url = get_marzban_subs_url(self.server.panel_add, get_marzban_cached_token(self.server),
@@ -168,7 +195,7 @@ class Subscription(models.Model):
     @property
     def get_original_confs(self) -> list:
         all = []
-        for l in self.link_set.all():
+        for l in self.link_set.filter(include_original=True):
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 all += l.get_marzban_confs_by_config_id()
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
@@ -176,34 +203,7 @@ class Subscription(models.Model):
         return all
 
     def get_edited_confs(self):
-        mss = []
-        qs = MiddleServer.objects.filter(active=True)
-        for ms in qs:
-            mss.append((ms.address, ms.port, ms.id))
-        marzban_visited_servers = []
-        all = []
-        for l in self.link_set.all():
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID and \
-                    l.server.id not in marzban_visited_servers:
-
-                original_confs = l.get_marzban_confs_by_config_id()
-                if len(original_confs) == 0:
-                    continue
-                edited_confs = get_edited_confs(original_confs, mss)
-                all += original_confs + edited_confs
-                marzban_visited_servers.append(l.server.id)
-
-            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.URI_LIST and l.server.id not in marzban_visited_servers:
-                original_confs = list(filter(lambda x: len(x) > 0, l.value.split("\n")))
-                if len(original_confs) == 0:
-                    continue
-                edited_confs = get_edited_confs(original_confs, mss)
-                all += original_confs + edited_confs
-                marzban_visited_servers.append(l.server.id)
-
-            if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
-                all.append(l.value)
-        return all
+        return get_edited_confs_func(self)
 
     def get_edited_confs_uri(self):
         all = self.get_edited_confs()
@@ -211,11 +211,10 @@ class Subscription(models.Model):
         #     print(oo)
         return base64.b64encode('\n'.join(all).encode('ascii'))
 
+    def get_all_confs_uri(self):
+        a = self.get_original_confs
+        a = a + self.get_edited_confs()
+        return base64.b64encode('\n'.join(a).encode('ascii'))
 
-class MiddleServer(models.Model):
-    address = models.CharField(max_length=128)
-    port = models.CharField(max_length=16)
-    active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.address + ' - ' + str(self.id)
+

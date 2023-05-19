@@ -70,6 +70,7 @@ class Confs(View):
         if user.id != subs.owner.id:
             raise PermissionDenied
         ressss = subs.get_edited_confs_uri()
+        ressss = subs.get_all_confs_uri()
         return HttpResponse(ressss)
 
 

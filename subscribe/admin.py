@@ -13,6 +13,7 @@ class FastSubscription(Subscription):
 
 @admin.register(Server)
 class ServerAdmin(ModelAdmin):
+    filter_horizontal = ('middle_servers',)
     pass
 
 
@@ -90,8 +91,9 @@ class FastSubscriptionAdmin(ModelAdmin):
 
     def pretty_last_used_traffic(self, instance):
         return pretty_byte(instance.last_used_traffic)
+    
 
 
 @admin.register(MiddleServer)
 class MiddleServerAdmin(ModelAdmin):
-    list_display = ('__str__', 'port', 'active')
+    list_display = ('__str__', 'port', 'server_type', 'active')
