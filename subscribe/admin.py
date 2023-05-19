@@ -59,8 +59,9 @@ class FastSubscriptionAdmin(ModelAdmin):
                     # 'link',
                     'status',
                     'remained_days',
+                    'last_used_traffic'
                     )
-    readonly_fields = ('link', 'remained_days')
+    readonly_fields = ('link', 'remained_days', 'last_used_traffic')
     # readonly_fields = ('link',)
     inlines = [LinkInline]
     actions = [update_status, update_status_of_all]

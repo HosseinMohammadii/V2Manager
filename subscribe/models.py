@@ -83,6 +83,7 @@ class Subscription(models.Model):
     created = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=SubscriptionStatuses.choices, default=SubscriptionStatuses.ACTIVE,
                               max_length=32)
+    last_used_traffic = models.IntegerField(default=0)
 
     def __str__(self):
         return ' - '.join((self.user_name, str(self.id)))
@@ -101,9 +102,13 @@ class Subscription(models.Model):
     @property
     def remained_megabytes(self):
         if self.traffic == 0:
-            return 10000
-        d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
-        return int(d)
+            d = 10000
+        else:
+            d = gigabyte_to_megabyte(self.traffic) - byte_to_megabyte(self.get_used_traffic())
+            d = int(d)
+        self.last_used_traffic = d
+        self.save()
+        return d
 
     def get_used_traffic(self):
         tr = 0
