@@ -72,7 +72,7 @@ class FastSubscriptionAdmin(ModelAdmin):
     actions = [update_status, update_status_of_all]
 
     def pretty_remained_traffic(self, instance):
-        return pretty_byte(instance.lazy_remained_megabytes)
+        return pretty_megabyte(instance.lazy_remained_megabytes)
 
     def pretty_last_used_traffic(self, instance):
         return pretty_byte(instance.last_used_traffic)
