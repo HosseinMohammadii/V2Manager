@@ -17,6 +17,7 @@ def get_original_confs_from_subscription(link, ) -> list:
         return []
 
 
+# servers format :  list of (ms.address, ms.port, ms.id, ms.vmess_extra_config, ms.vless_extra_config, ms.trojan_extra_config, ms.remark, base_remark)
 def get_edited_confs(confs: list, servers: list):
     added_props = set()
     produced = []
@@ -28,14 +29,13 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vmess_" + dconf['net']
             if prop_key in added_props:
                 continue
-            for serv, port, idd in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
                 dconf = get_vmess_dict(conf.replace("vmess://", ""))
-                smid = int(len(serv) / 2)
-                serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
-                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["ps"] += " Depart " + serv_id
+                dconf["ps"] = ' '.join((base_remark, dconf["ps"], remark))
+                if vmess_ec is not None:
+                    dconf.update(vmess_ec)
                 added_props.add(prop_key)
                 produced.append("vmess://" + str(get_vmess_uri(dconf)))
 
@@ -44,14 +44,13 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vless_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, idd in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
                 dconf = get_vless_dict(conf.replace("vless://", ""))
-                smid = int(len(serv) / 2)
-                serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
-                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] += " Depart " + serv_id
+                dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
+                if vless_ec is not None:
+                    dconf.update(vless_ec)
                 added_props.add(prop_key)
                 produced.append("vless://" + get_vless_uri(dconf))
 
@@ -60,14 +59,14 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "trojan_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, idd in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
                 dconf = get_trojan_dict(conf.replace("trojan://", ""))
-                smid = int(len(serv) / 2)
-                serv_id = '_'.join((serv[:2], serv[smid - 1:smid + 1], serv[-2:]))
-                serv_id = str(idd)
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] += " Depart " + serv_id
+                dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
+
+                if trojan_ec is not None:
+                    dconf.update(trojan_ec)
                 added_props.add(prop_key)
                 # print(dconf)
                 produced.append("trojan://" + get_trojan_uri(dconf))
@@ -162,7 +161,7 @@ def get_vless_uri(d: dict):
     return base + extras
 
 
-def get_vmess_dict(uri: str):
+def get_vmess_dict(uri: str) -> dict:
     d = json.loads(base64.b64decode(uri).decode('ascii'))
     return d
 

@@ -47,16 +47,21 @@ class SubscriptionStatuses(models.TextChoices):
 
 
 class MiddleServer(models.Model):
+    remark = models.CharField(max_length=32, null=True, blank=True)
     address = models.CharField(max_length=128)
     port = models.CharField(max_length=16)
     active = models.BooleanField(default=True)
     server_type = models.CharField(max_length=32, choices=MiddleServerType.choices, default=MiddleServerType.FRAGMENT)
+    vmess_extra_config = models.JSONField(max_length=512, null=True, blank=True)
+    vless_extra_config = models.JSONField(max_length=512, null=True, blank=True)
+    trojan_extra_config = models.JSONField(max_length=512, null=True, blank=True)
 
     def __str__(self):
-        return self.address + ' - ' + str(self.id)
+        return self.address + ' - ' + str(self.id) + ' - ' + str(self.remark)
 
 
 class Server(models.Model):
+    remark = models.CharField(max_length=32, null=True, blank=True)
     add = models.CharField(max_length=128, null=True, blank=True)
     host = models.CharField(max_length=128, null=True, blank=True)
     port = models.CharField(max_length=16, default=54321)
@@ -68,6 +73,7 @@ class Server(models.Model):
 
     middle_servers = models.ManyToManyField(MiddleServer)
 
+
     def __str__(self):
         return ":".join((str(self.add), self.port))
 
@@ -77,7 +83,9 @@ class Server(models.Model):
     def get_mss(self): # suitable for edit confs functions
         mss = []
         for ms in self.middle_servers.filter(active=True):
-            mss.append((ms.address, ms.port, ms.id))
+            mss.append((ms.address, ms.port, ms.id,
+                        ms.vmess_extra_config, ms.vmess_extra_config, ms.trojan_extra_config,
+                        ms.remark, self.remark))
         return mss
 
 
