@@ -56,7 +56,7 @@ class SubscriptionAdmin(ModelAdmin):
         'get_original_confs',
         'get_edited_confs',
         'remained_days',
-        'remained_megabytes',
+        'realtime_remained_megabytes',
         'last_check_time',
     )
     inlines = [LinkInline]
