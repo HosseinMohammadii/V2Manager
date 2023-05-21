@@ -29,7 +29,7 @@ class FirstPage(LoginRequiredMixin, View):
             return render(request, "forbidden.html", status=403)
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
-        if request.user.id != subs.owner.id:
+        if request.user.id != subs.owner.id and not request.user.is_superuser:
             return render(request, "forbidden.html", status=403)
         auth_query_string = get_query_string(subs.owner, 'subs')
         confs_url = request.get_full_path()+"confs/"+auth_query_string
@@ -47,7 +47,7 @@ class Info(LoginRequiredMixin, View):
 
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
-        if request.user.id != subs.owner.id:
+        if request.user.id != subs.owner.id and not request.user.is_superuser:
             return render(request, "forbidden.html", status=403)
         used_traffic = pretty_byte(subs.get_used_traffic())
 
@@ -67,7 +67,7 @@ class Confs(View):
         identifier = kwargs['id']
         subs = Subscription.objects.get(identifier=identifier)
         print(user, subs.owner)
-        if user.id != subs.owner.id:
+        if user.id != subs.owner.id and not user.is_superuser:
             raise PermissionDenied
         ressss = subs.get_edited_confs_uri()
         ressss = subs.get_all_confs_uri()
