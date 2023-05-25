@@ -1,26 +1,19 @@
-import base64
-import json
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 
-import requests
 from django.shortcuts import render, redirect
 from django.views import View
-from django.views.decorators.http import require_safe
 from persiantools.jdatetime import JalaliDate
 
-from sesame.utils import get_token, get_query_string, get_user as sesame_get_user
+from sesame.utils import get_query_string, get_user as sesame_get_user
 
 from utils.size import pretty_byte
 from .models import Subscription
 
 from .forms import BaseLoginForm, LoginForm
-
-
 
 
 class FirstPage(LoginRequiredMixin, View):
@@ -49,12 +42,19 @@ class Info(LoginRequiredMixin, View):
         subs = Subscription.objects.get(identifier=identifier)
         if request.user.id != subs.owner.id and not request.user.is_superuser:
             return render(request, "forbidden.html", status=403)
-        used_traffic = pretty_byte(subs.get_used_traffic())
+
+        used_traffic = pretty_byte(subs.get_total_used_traffic())
+
+        traffic = str(subs.get_traffic_gb())
+        traffic_type = subs.get_traffic_text()
+
+        jalali_expiredate = JalaliDate(subs.expire_date).strftime("%Y/%m/%d") if subs.expire_date is not None else "بدون محدودیت زمانی"
 
         return render(request, 'info.html',
                       {"used_traffic": used_traffic,
-                       "traffic": subs.traffic,
-                       "jalali_expiredate": JalaliDate(subs.expire_date).strftime("%Y/%m/%d")})
+                       "traffic": traffic,
+                       "traffic_type": traffic_type,
+                       "jalali_expiredate": jalali_expiredate})
 
 
 class Confs(View):
@@ -69,7 +69,6 @@ class Confs(View):
         print(user, subs.owner)
         if user.id != subs.owner.id and not user.is_superuser:
             raise PermissionDenied
-        ressss = subs.get_edited_confs_uri()
         ressss = subs.get_all_confs_uri()
         return HttpResponse(ressss)
 

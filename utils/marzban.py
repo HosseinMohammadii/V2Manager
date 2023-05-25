@@ -8,8 +8,11 @@ def get_marzban_token(add, username, password):
     d = f"grant_type=&username={username}&password={password}&scope=&client_id=&client_secret="
     headers = {'accept': 'application/json',
                'Content-Type': 'application/x-www-form-urlencoded'}
-    res = requests.post(url, headers=headers, data=d)
-    return res.json()["access_token"]
+    try:
+        res = requests.post(url, headers=headers, data=d)
+        return res.json()["access_token"]
+    except:
+        return ''
 
 
 def get_marzban_traffic(subs_url, ):
