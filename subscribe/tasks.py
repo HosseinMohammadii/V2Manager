@@ -1,7 +1,7 @@
 def check_and_disable_subs(qs):
     disabled_subs = []
     for sub in qs:
-        if sub.remained_days < 1:
+        if sub.remained_days < 0:
             sub.disable()
             sub.update_status_dis_time()
             disabled_subs.append(sub)
