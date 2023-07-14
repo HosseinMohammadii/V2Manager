@@ -17,7 +17,29 @@ def get_original_confs_from_subscription(link, ) -> list:
         return []
 
 
-# servers format :  list of (ms.address, ms.port, ms.id, ms.vmess_extra_config, ms.vless_extra_config, ms.trojan_extra_config, ms.remark, base_remark)
+def just_rename_configs(configs, base_remark):
+    produced = []
+    for config in configs:
+        if config.find('vmess://') > -1:
+            dconf = get_vmess_dict(config.replace("vmess://", ""))
+            dconf["ps"] = ' '.join((base_remark, dconf["ps"]))
+            produced.append("vmess://" + str(get_vmess_uri(dconf)))
+
+        elif config.find('vless://') > -1:
+            dconf = get_vless_dict(config.replace("vless://", ""))
+            dconf["realName"] = ' '.join((base_remark, dconf["realName"]))
+            produced.append("vless://" + get_vless_uri(dconf))
+
+        elif config.find('trojan://') > -1:
+            dconf = get_trojan_dict(config.replace("trojan://", ""))
+            dconf["realName"] = ' '.join((base_remark, dconf["realName"]))
+            produced.append("trojan://" + get_trojan_uri(dconf))
+
+    return produced
+
+
+# servers format :  list of (ms.address, ms.port, ms.id, ms.vmess_extra_config, ms.vless_extra_config,
+# ms.trojan_extra_config, ms.remark, base_remark)
 def get_edited_confs(confs: list, servers: list):
     added_props = set()
     produced = []
@@ -103,7 +125,7 @@ def get_trojan_uri(d: dict):
     else:
         d['path'] = d['path'] + "#" + quote(d['realName'])
 
-    del(d['realName'])
+    del (d['realName'])
 
     base = f"{d['password']}@{d['add']}:{d['port']}"
     del (d['password'])
@@ -147,7 +169,7 @@ def get_vless_uri(d: dict):
     else:
         d['path'] = d['path'] + "#" + quote(d['realName'])
 
-    del(d['realName'])
+    del (d['realName'])
 
     base = f"{d['password']}@{d['add']}:{d['port']}"
     del (d['password'])

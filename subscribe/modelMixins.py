@@ -5,7 +5,7 @@ from django.utils import timezone
 from utils.cache import get_marzban_cached_token
 from utils.marzban import get_marzban_traffic_from_api, disable_enable_marzban_config
 from utils.size import gigabyte_to_megabyte, byte_to_megabyte
-from utils.uri import get_original_confs_from_subscription, get_edited_confs
+from utils.uri import get_original_confs_from_subscription, get_edited_confs, just_rename_configs
 from utils.xui import get_xui_traffic, disable_enable_xui_config
 from subscribe.constants import LinkTypes, MiddleServerType, PanelTypes, SubscriptionStatuses
 
@@ -16,9 +16,12 @@ class SubscriptionConfigMethodsMixin:
         all = []
         for l in self.link_set.filter(include_original=True):
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
-                all += l.get_marzban_confs_by_config_id()
+
+                all += just_rename_configs(l.get_marzban_confs_by_config_id(), l.server.remark)
+
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
-                all.append(l.value)
+                all.append(just_rename_configs((l.value,), l.server.remark))
+
         return all
 
     def get_edited_confs(self):
