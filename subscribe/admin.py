@@ -36,7 +36,7 @@ def update_status(modeladmin, request, queryset):
     )
 
 
-@admin.action(description="enable configs")
+@admin.action(description="Enable Configs")
 def enable_all_configs(modeladmin, request, queryset):
     enabled_subs = []
     for sub in queryset:
@@ -53,7 +53,7 @@ def enable_all_configs(modeladmin, request, queryset):
     )
 
 
-@admin.action(description="make used traffic zero")
+@admin.action(description="Reset Used Traffic")
 def zero_traffic(modeladmin, request, queryset):
     enabled_subs = []
     for sub in queryset:
@@ -94,7 +94,7 @@ class SubscriptionAdmin(ModelAdmin):
         'last_check_time',
     )
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all]
+    actions = [update_status, update_status_of_all, enable_all_configs, zero_traffic]
 
 
 @admin.register(FastSubscription)
@@ -118,7 +118,7 @@ class FastSubscriptionAdmin(ModelAdmin):
     )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all, enable_all_configs]
+    actions = [update_status, update_status_of_all, enable_all_configs, zero_traffic]
 
     def pretty_remained_traffic(self, instance):
         return pretty_megabyte(instance.lazy_remained_megabytes)
