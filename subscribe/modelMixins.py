@@ -3,10 +3,10 @@ import base64
 from django.utils import timezone
 
 from utils.cache import get_marzban_cached_token
-from utils.marzban import get_marzban_traffic_from_api, disable_enable_marzban_config
+from utils.marzban import get_marzban_traffic_from_api, disable_enable_marzban_config, zero_traffic_marzban_config
 from utils.size import gigabyte_to_megabyte, byte_to_megabyte
 from utils.uri import get_original_confs_from_subscription, get_edited_confs, just_rename_configs
-from utils.xui import get_xui_traffic, disable_enable_xui_config
+from utils.xui import get_xui_traffic, disable_enable_xui_config, zero_traffic_xui_config
 from subscribe.constants import LinkTypes, MiddleServerType, PanelTypes, SubscriptionStatuses
 
 
@@ -16,7 +16,6 @@ class SubscriptionConfigMethodsMixin:
         all = []
         for l in self.link_set.filter(include_original=True):
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
-
                 all += just_rename_configs(l.get_marzban_confs_by_config_id(), l.server.remark)
 
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
@@ -101,6 +100,7 @@ class SubscriptionTrafficMethodsMixin:
         from subscribe.models import Link
         def link_id(link: Link):
             return l.server.panel_add + l.config_id
+
         fetched_records = []
         tr = 0
         for l in self.link_set.all():
@@ -159,6 +159,25 @@ class SubscriptionActionMethodsMixin:
             if l.server.panel == PanelTypes.XUI:
                 disable_enable_xui_config(l.server.panel_add, l.server.auth,
                                           l.config_id, "disable")
+
+    def enable(self):
+        for l in self.link_set.all():
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
+                disable_enable_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
+                                              l.config_id, "enable")
+            if l.server.panel == PanelTypes.XUI:
+                disable_enable_xui_config(l.server.panel_add, l.server.auth,
+                                          l.config_id, "enable")
+        self.update_status_active()
+
+    def zero_traffic(self):
+        for l in self.link_set.all():
+            if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
+                zero_traffic_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
+                                            l.config_id, "enable")
+            if l.server.panel == PanelTypes.XUI:
+                zero_traffic_xui_config(l.server.panel_add, l.server.auth,
+                                        l.config_id, "enable")
 
     def update_status_active(self):
         self.status = SubscriptionStatuses.ACTIVE

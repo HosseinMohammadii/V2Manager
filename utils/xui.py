@@ -63,6 +63,43 @@ def disable_enable_xui_config(add, auth, id, action: str):
         return False
 
 
+def zero_traffic_xui_config(add, auth, id, action: str):
+    url = f"{add}/xui/inbound/list"
+    session = f"session={auth}"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Cookie": session
+    }
+    conf = None
+    try:
+        res = requests.post(url, headers=headers)
+        resj = res.json()
+        for o in resj["obj"]:
+            if o["id"] == int(id):
+                conf = o
+    except requests.exceptions.RequestException:
+        print("Couldn't get data from", add)
+
+    if conf is None:
+        return False
+
+    url = f"{add}/xui/inbound/update/{id}"
+    conf["up"] = 0
+    conf["down"] = 0
+    del(conf["id"])
+    del(conf["user_id"])
+    del(conf['tag'])
+
+    s = ''
+    for k, v in conf.items():
+        s += k + '=' + parse.quote(str(v)) + '&'
+
+    try:
+        res = requests.post(url, headers=headers, data=s)
+        return res.json()['success']
+    except:
+        return False
+
 def xui_nginx_ws_creator(l: list):
     # list of path and port
     for path, port in l:

@@ -27,8 +27,42 @@ def update_status(modeladmin, request, queryset):
     dis_subs = check_and_disable_subs(queryset)
     msg = ""
     for s in dis_subs:
-        msg += f"  subs id: {s.id} of {s.owner.username}  -"
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
     msg += "disabled"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
+@admin.action(description="enable configs")
+def enable_all_configs(modeladmin, request, queryset):
+    enabled_subs = []
+    for sub in queryset:
+        sub.enable()
+        enabled_subs.append(sub)
+    msg = ""
+    for s in enabled_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "enabled"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
+@admin.action(description="make used traffic zero")
+def zero_traffic(modeladmin, request, queryset):
+    enabled_subs = []
+    for sub in queryset:
+        sub.zero_traffic()
+        enabled_subs.append(sub)
+    msg = ""
+    for s in enabled_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "reset traffic"
 
     modeladmin.message_user(
         request,
@@ -84,14 +118,13 @@ class FastSubscriptionAdmin(ModelAdmin):
     )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all]
+    actions = [update_status, update_status_of_all, enable_all_configs]
 
     def pretty_remained_traffic(self, instance):
         return pretty_megabyte(instance.lazy_remained_megabytes)
 
     def pretty_last_used_traffic(self, instance):
         return pretty_byte(instance.last_used_traffic)
-    
 
 
 @admin.register(MiddleServer)

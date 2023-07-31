@@ -67,6 +67,21 @@ def disable_enable_marzban_config(add, auth, id, action: str):
         return False
 
 
+def zero_traffic_marzban_config(add, auth, id, action: str):
+    url = f"{add}/api/user/{id}/reset"
+
+    headers = {
+        "Authorization": "Bearer " + auth,
+        "Accept": "application/json",
+    }
+    data = {}
+
+    try:
+        res = requests.post(url, headers=headers, data=json.dumps(data))
+        return True
+    except requests.exceptions.ConnectionError:
+        return False
+
 if __name__ == '__main__':
     # t = get_marzban_token("https://panel1.novationmarket.com", "hossein", "iran!123")
     t = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJob3NzZWluIiwiYWNjZXNzIjoic3VkbyIsImV4cCI6MTY4NDU3MzE2NX0.bwoZDrweaZRr9i_jesHzfn-aGZOXUVVsXeOkCUeVpnA"
