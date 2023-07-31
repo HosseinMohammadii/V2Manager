@@ -87,7 +87,6 @@ def zero_traffic_xui_config(add, auth, id, action: str):
     conf["up"] = 0
     conf["down"] = 0
     del(conf["id"])
-    del(conf["user_id"])
     del(conf['tag'])
 
     s = ''
