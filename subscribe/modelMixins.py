@@ -19,7 +19,7 @@ class SubscriptionConfigMethodsMixin:
                 all += just_rename_configs(l.get_marzban_confs_by_config_id(), l.server.remark)
 
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
-                all.append(just_rename_configs((l.value,), l.server.remark))
+                all += just_rename_configs((l.value,), l.server.remark)
 
         return all
 
