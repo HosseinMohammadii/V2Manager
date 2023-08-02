@@ -1,4 +1,5 @@
 import base64
+import datetime
 
 from django.utils import timezone
 
@@ -170,7 +171,7 @@ class SubscriptionActionMethodsMixin:
                                           l.config_id, "enable")
         self.update_status_active()
 
-    def zero_traffic(self):
+    def reset_traffic(self):
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 zero_traffic_marzban_config(l.server.panel_add, get_marzban_cached_token(l.server),
@@ -178,6 +179,12 @@ class SubscriptionActionMethodsMixin:
             if l.server.panel == PanelTypes.XUI:
                 zero_traffic_xui_config(l.server.panel_add, l.server.auth,
                                         l.config_id, "enable")
+
+    def set_expire_date_next_month(self):
+        d = datetime.date.today()
+        self.expire_date = d.replace(month=d.month+1)
+        self.save()
+
 
     def update_status_active(self):
         self.status = SubscriptionStatuses.ACTIVE

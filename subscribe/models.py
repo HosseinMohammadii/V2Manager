@@ -84,6 +84,7 @@ class Subscription(models.Model,
     )
     identifier = models.UUIDField(default=uuid.uuid4, editable=True)
     user_name = models.CharField(max_length=256)
+    description = models.TextField(null=True, blank=True)
     traffic = models.IntegerField(default=0, help_text="In gigabytes")
     expire_date = models.DateField(null=True, blank=True)
     created = models.DateTimeField(auto_now=True)

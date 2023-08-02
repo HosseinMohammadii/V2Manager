@@ -54,10 +54,10 @@ def enable_all_configs(modeladmin, request, queryset):
 
 
 @admin.action(description="Reset Used Traffic")
-def zero_traffic(modeladmin, request, queryset):
+def reset_traffic(modeladmin, request, queryset):
     enabled_subs = []
     for sub in queryset:
-        sub.zero_traffic()
+        sub.reset_traffic()
         enabled_subs.append(sub)
     msg = ""
     for s in enabled_subs:
@@ -74,6 +74,23 @@ def zero_traffic(modeladmin, request, queryset):
 def update_status_of_all(modeladmin, request, queryset):
     qs = Subscription.objects.all()
     update_status(modeladmin, request, qs)
+
+
+@admin.action(description="Set One Month From Today")
+def set_expire_date_next_month(modeladmin, request, queryset):
+    edited_subs = []
+    for sub in queryset:
+        sub.set_expire_date_next_month()
+        edited_subs.append(sub)
+    msg = ""
+    for s in edited_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "edited"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
 
 
 @admin.register(Subscription)
@@ -94,7 +111,7 @@ class SubscriptionAdmin(ModelAdmin):
         'last_check_time',
     )
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, zero_traffic]
+    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
 
 
 @admin.register(FastSubscription)
@@ -118,7 +135,7 @@ class FastSubscriptionAdmin(ModelAdmin):
     )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, zero_traffic]
+    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
 
     def pretty_remained_traffic(self, instance):
         return pretty_megabyte(instance.lazy_remained_megabytes)
