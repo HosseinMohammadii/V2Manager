@@ -117,5 +117,3 @@ class Subscription(models.Model,
             return 100
         d = (self.expire_date - datetime.date.today()).days
         return d
-
-

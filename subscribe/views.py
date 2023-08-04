@@ -2,16 +2,18 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.http import HttpResponse
 
 from django.shortcuts import render, redirect
 from django.views import View
 from persiantools.jdatetime import JalaliDate
+from django.http import JsonResponse
 
 from sesame.utils import get_query_string, get_user as sesame_get_user
 
 from utils.size import pretty_byte
-from .models import Subscription
+from .models import Subscription, Link, Server
 
 from .forms import BaseLoginForm, LoginForm
 
@@ -103,3 +105,23 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect(request.GET.get('next', '/'))
+
+
+def repeated_config_ids(request):
+    if not request.user.is_authenticated and not request.user.is_superuser:
+        return render(request, "forbidden.html", status=403)
+
+    qs = Link.objects.values('server', 'config_id').annotate(count=Count('id')).order_by('-count')
+
+    data = {}
+    for record in qs:
+        if record['count'] > 1:
+            k = Server.objects.get(pk=record['server']).add+'  -  '+record['config_id']
+            vals = Link.objects.filter(server__id=record['server'], config_id=record['config_id']).values_list('subscription__id', 'subscription__status')
+            data[k] = dict(vals)
+
+    return JsonResponse(data=data)
+
+
+
+
