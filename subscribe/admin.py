@@ -93,6 +93,25 @@ def set_expire_date_next_month(modeladmin, request, queryset):
     )
 
 
+@admin.action(description="Renew Reset+1M+Enable")
+def renew(modeladmin, request, queryset):
+    edited_subs = []
+    for sub in queryset:
+        sub.set_expire_date_next_month()
+        sub.reset_traffic()
+        sub.enable()
+        edited_subs.append(sub)
+    msg = ""
+    for s in edited_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "edited"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
 @admin.register(Subscription)
 class SubscriptionAdmin(ModelAdmin):
     list_display = (
@@ -135,7 +154,8 @@ class FastSubscriptionAdmin(ModelAdmin):
     )
     # readonly_fields = ('link',)
     inlines = [LinkInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
+    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
+               renew]
 
     def pretty_remained_traffic(self, instance):
         return pretty_megabyte(instance.lazy_remained_megabytes)
