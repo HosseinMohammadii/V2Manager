@@ -122,6 +122,8 @@ class SubscriptionTrafficMethodsMixin:
 
             if amount > 0:
                 fetched_records.append(link_id(l))
+                l.used_traffic = float("{:0.3f}".format(amount / (1024 ** 3)))
+                l.save()
                 tr += amount
 
         self.update_last_used_traffic(tr)

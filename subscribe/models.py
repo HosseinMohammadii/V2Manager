@@ -63,6 +63,7 @@ class Link(models.Model):
     value = models.TextField()
     type = models.CharField(max_length=64, choices=LinkTypes.choices, default=LinkTypes.BY_CONFIG_ID)
     include_original = models.BooleanField(default=False)
+    used_traffic = models.BigIntegerField(default=0, help_text="In gigabytes")
 
     def get_marzban_confs_by_config_id(self):
         url = get_marzban_subs_url(self.server.panel_add, get_marzban_cached_token(self.server),
