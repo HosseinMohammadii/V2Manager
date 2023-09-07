@@ -23,6 +23,7 @@ class MiddleServer(models.Model):
     vmess_extra_config = models.JSONField(max_length=512, null=True, blank=True)
     vless_extra_config = models.JSONField(max_length=512, null=True, blank=True)
     trojan_extra_config = models.JSONField(max_length=512, null=True, blank=True)
+    apply_on = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.address + ' - ' + str(self.id) + ' - ' + str(self.remark)
@@ -52,7 +53,7 @@ class Server(models.Model):
         for ms in self.middle_servers.filter(active=True):
             mss.append((ms.address, ms.port, ms.id,
                         ms.vmess_extra_config, ms.vmess_extra_config, ms.trojan_extra_config,
-                        ms.remark, self.remark))
+                        ms.remark, self.remark, ms.apply_on))
         return mss
 
 

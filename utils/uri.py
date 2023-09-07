@@ -6,6 +6,33 @@ import requests
 from urllib.parse import unquote, quote
 
 
+def convert_net(val):
+    if val == 'ws':
+        return 'ws'
+    elif val == 'grpc':
+        return 'grpc'
+
+
+def convert_protocol(val):
+    if val == 'trojan':
+        return 'tr'
+    elif val == 'vmess':
+        return 'vm'
+    elif val == 'vless':
+        return 'vl'
+    raise ValueError
+
+
+def is_applicable(protocol, net, apply_on_str):
+    if apply_on_str is None or len(apply_on_str) < 2:
+        return True
+    apply_on_list = apply_on_str.split(",")
+    for apply_on in apply_on_list:
+        if protocol+'-'+net in apply_on:
+            return True
+    return False
+
+
 def get_original_confs_from_subscription(link, ) -> list:
     try:
         res = requests.get(link)
@@ -51,8 +78,10 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vmess_" + dconf['net']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
                 dconf = get_vmess_dict(conf.replace("vmess://", ""))
+                if not is_applicable(convert_protocol('vmess'), convert_net(dconf['net']), apply_on):
+                    continue
                 dconf["add"] = serv
                 dconf["port"] = port
                 dconf["ps"] = ' '.join((base_remark, dconf["ps"], remark))
@@ -66,8 +95,10 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vless_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
                 dconf = get_vless_dict(conf.replace("vless://", ""))
+                if not is_applicable(convert_protocol('vless'), convert_net(dconf['type']), apply_on):
+                    continue
                 dconf["add"] = serv
                 dconf["port"] = port
                 dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
@@ -81,8 +112,10 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "trojan_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
                 dconf = get_trojan_dict(conf.replace("trojan://", ""))
+                if not is_applicable(convert_protocol('trojan'), convert_net(dconf['type']), apply_on):
+                    continue
                 dconf["add"] = serv
                 dconf["port"] = port
                 dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
@@ -194,21 +227,26 @@ def get_vmess_uri(d: dict):
 
 
 if __name__ == '__main__':
-    trojans = [
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@realshop.novationmarket.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1%20%5BTrojan%20ws%5D",
+    # trojans = [
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@realshop.novationmarket.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1%20%5BTrojan%20ws%5D",
+    #
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@bitcoin.cashypto.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1-MCI1%20%5BTrojan%20ws%5D",
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@dogecoin.cashypto.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com"
+    #     "&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1-Irancell1%20%5BTrojan%20ws%5D",
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@realshop.novationmarket.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1%20%5BTrojan%20grpc%5D",
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@bitcoin.cashypto.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1-MCI1%20%5BTrojan%20grpc%5D",
+    #     "trojan://hsITmEQiHPjVJ9AV1k4Jhg@dogecoin.cashypto.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1-Irancell1%20%5BTrojan%20grpc%5D=", ]
+    # for trj in trojans:
+    #     print('\n')
+    #     print(trj)
+    #     trojan_d = get_trojan_dict(trj)
+    #     print(trojan_d)
+    #     trojan_uri = get_trojan_uri(trojan_d)
+    #     print(trojan_uri)
+    #     trojan_d = get_trojan_dict(trojan_uri)
+    #     print(trojan_d)
+    vm_sample = "ewogICJ2IjogIjIiLAogICJwcyI6ICJzNyIsCiAgImFkZCI6ICJwYW5lbDF4LmlyZG9tYWluLmxpbmsiLAogICJwb3J0IjogMjYzMjAsCiAgImlkIjogIjg3Y2EyZDFkLTQ4ZDAtNDBmOS05YmJjLWZmYWE0YWYyY2EwNSIsCiAgImFpZCI6IDAsCiAgIm5ldCI6ICJ3cyIsCiAgInR5cGUiOiAibm9uZSIsCiAgImhvc3QiOiAiIiwKICAicGF0aCI6ICIvUXhJRldsa3pQT3puLyIsCiAgInRscyI6ICJub25lIgp9"
+    print(get_vmess_dict(vm_sample))
 
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@bitcoin.cashypto.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1-MCI1%20%5BTrojan%20ws%5D",
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@dogecoin.cashypto.com:443?security=tls&type=ws&host=&sni=realshop.novationmarket.com"
-        "&headerType=&path=%2Ftw#%F0%9F%8F%82%20Fr1-Irancell1%20%5BTrojan%20ws%5D",
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@realshop.novationmarket.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1%20%5BTrojan%20grpc%5D",
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@bitcoin.cashypto.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1-MCI1%20%5BTrojan%20grpc%5D",
-        "trojan://hsITmEQiHPjVJ9AV1k4Jhg@dogecoin.cashypto.com:443?security=tls&type=grpc&host=&sni=realshop.novationmarket.com&headerType=&serviceName=tg#%F0%9F%8F%82%20Fr1-Irancell1%20%5BTrojan%20grpc%5D=", ]
-    for trj in trojans:
-        print('\n')
-        print(trj)
-        trojan_d = get_trojan_dict(trj)
-        print(trojan_d)
-        trojan_uri = get_trojan_uri(trojan_d)
-        print(trojan_uri)
-        trojan_d = get_trojan_dict(trojan_uri)
-        print(trojan_d)
+    vl_sample = "81b9eea8-7cef-4cdc-f50e-fd783fe8ee27@panel1x.irdomain.link:41916?type=ws&security=none&path=%2FgVqoJjnYByWz%2F#s27%20khoshnoodF"
+    print(get_vless_dict(vl_sample))
