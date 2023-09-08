@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
+from payment.admin import PaymentInline
 from utils.size import pretty_megabyte, pretty_byte
 from .models import Subscription, MiddleServer, Link, Server
 from .tasks import check_and_disable_subs
@@ -129,7 +130,7 @@ class SubscriptionAdmin(ModelAdmin):
         'realtime_remained_megabytes',
         'last_check_time',
     )
-    inlines = [LinkInline]
+    inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
 
 
@@ -153,7 +154,7 @@ class FastSubscriptionAdmin(ModelAdmin):
         'last_check_time',
     )
     # readonly_fields = ('link',)
-    inlines = [LinkInline]
+    inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
                renew]
 

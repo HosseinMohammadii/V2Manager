@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'subscribe',
+    'payment',
 ]
 
 MIDDLEWARE = [
@@ -144,4 +145,4 @@ SERVER_ADDRESS = config('SERVER_ADDRESS', cast=str)
 CSRF_TRUSTED_ORIGINS = ['https://*.com']
 LOGIN_URL = '/subs/login'
 
-SESAME_MAX_AGE = 240
+SESAME_MAX_AGE = 360
