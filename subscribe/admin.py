@@ -130,6 +130,7 @@ class SubscriptionAdmin(ModelAdmin):
         'realtime_remained_megabytes',
         'last_check_time',
     )
+    search_fields = ['id', 'user_name', 'description']
     inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
 
