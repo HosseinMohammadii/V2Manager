@@ -13,7 +13,7 @@ class Payment(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = 'created'
+        ordering = ['created']
 
 
 
