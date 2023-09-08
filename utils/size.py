@@ -13,19 +13,30 @@ byte_size_system = [
 
 
 def pretty_byte(b):
+    is_minus = False
+    if b < 0:
+        b = -b
+        is_minus = True
+
+    ret = None
     m = math.log2(b)
     if 0 < m < 10:
         bb = b
-        return str(bb) + " بایت "
+        ret = str(bb) + " بایت "
     if 10 < m < 20:
         bb = round(b / 1024, ndigits=3)
-        return str(bb) + " کیلوبایت "
+        ret = str(bb) + " کیلوبایت "
     if 20 < m < 30:
         bb = round(b / 1024 ** 2, ndigits=3)
-        return str(bb) + " مگابایت "
+        ret = str(bb) + " مگابایت "
     if 30 < m < 40:
         bb = round(b / 1024 ** 3, ndigits=3)
-        return str(bb) + " گیگابایت "
+        ret = str(bb) + " گیگابایت "
+
+    if is_minus:
+        return '-' + ret
+
+    return ret
 
     return size(b, system=byte_size_system)
 
