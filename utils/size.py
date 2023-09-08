@@ -18,6 +18,9 @@ def pretty_byte(b):
         b = -b
         is_minus = True
 
+    if b == 0:
+        return str(0) + " بایت "
+
     ret = None
     m = math.log2(b)
     if 0 < m < 10:
