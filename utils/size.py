@@ -33,7 +33,7 @@ def pretty_byte(b):
         bb = int(b / 1024 ** 2)
         ret = str(bb) + " مگابایت "
     if 30 < m < 40:
-        bb = round(b / 1024 ** 3, ndigits=3)
+        bb = round(b / 1024 ** 3, ndigits=2)
         ret = str(bb) + " گیگابایت "
 
     if is_minus:
