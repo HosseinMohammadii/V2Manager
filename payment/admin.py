@@ -12,6 +12,11 @@ class PaymentModelAdmin(ModelAdmin):
     autocomplete_fields = ['subscription']
     list_filter = ['done']
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields["amount"].widget = NumberInput(attrs={'size': 10})
+        return form
+
 
 class PaymentInline(TabularInline):
     model = Payment
