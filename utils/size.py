@@ -27,10 +27,10 @@ def pretty_byte(b):
         bb = b
         ret = str(bb) + " بایت "
     if 10 < m < 20:
-        bb = round(b / 1024, ndigits=3)
+        bb = int(b / 1024)
         ret = str(bb) + " کیلوبایت "
     if 20 < m < 30:
-        bb = round(b / 1024 ** 2, ndigits=3)
+        bb = int(b / 1024 ** 2)
         ret = str(bb) + " مگابایت "
     if 30 < m < 40:
         bb = round(b / 1024 ** 3, ndigits=3)
