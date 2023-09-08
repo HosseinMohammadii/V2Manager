@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.db import models
+from django.forms import Textarea, TextInput, NumberInput
 
 from payment.admin import PaymentInline
 from utils.size import pretty_megabyte, pretty_byte
@@ -21,6 +23,11 @@ class ServerAdmin(ModelAdmin):
 class LinkInline(admin.TabularInline):
     model = Link
     extra = 1
+    formfield_overrides = {
+        models.CharField: {'widget': TextInput(attrs={'size': '16'})},
+        models.TextField: {'widget': Textarea(attrs={'rows': 5, 'cols': 50})},
+        models.FloatField: {'widget': NumberInput(attrs={'size': 6})},
+    }
 
 
 @admin.action(description="update subs status and action if needed")
@@ -154,10 +161,16 @@ class FastSubscriptionAdmin(ModelAdmin):
         'pretty_remained_traffic',
         'last_check_time',
     )
+
     # readonly_fields = ('link',)
     inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
                renew]
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields["pre_used_traffic"].widget = NumberInput(attrs={'size': 18})
+        return form
 
     def pretty_remained_traffic(self, instance):
         return pretty_megabyte(instance.lazy_remained_megabytes)
