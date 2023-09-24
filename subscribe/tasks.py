@@ -5,6 +5,7 @@ def check_and_disable_subs(qs):
             sub.disable()
             sub.update_status_dis_time()
             disabled_subs.append(sub)
+            a = sub.realtime_remained_megabytes
 
         elif sub.realtime_remained_megabytes < 50:
             sub.disable()
