@@ -45,6 +45,8 @@ def get_original_confs_from_subscription(link, ) -> list:
 
 
 def just_rename_configs(configs, base_remark, end_remark):
+    end_remark = '' if end_remark is None else end_remark
+
     produced = []
     for config in configs:
         if config.find('vmess://') > -1:
