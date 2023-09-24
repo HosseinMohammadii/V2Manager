@@ -44,22 +44,22 @@ def get_original_confs_from_subscription(link, ) -> list:
         return []
 
 
-def just_rename_configs(configs, base_remark):
+def just_rename_configs(configs, base_remark, end_remark):
     produced = []
     for config in configs:
         if config.find('vmess://') > -1:
             dconf = get_vmess_dict(config.replace("vmess://", ""))
-            dconf["ps"] = ' '.join((base_remark, dconf["ps"]))
+            dconf["ps"] = ' '.join((base_remark, dconf["ps"], end_remark))
             produced.append("vmess://" + str(get_vmess_uri(dconf)))
 
         elif config.find('vless://') > -1:
             dconf = get_vless_dict(config.replace("vless://", ""))
-            dconf["realName"] = ' '.join((base_remark, dconf["realName"]))
+            dconf["realName"] = ' '.join((base_remark, dconf["realName"], end_remark))
             produced.append("vless://" + get_vless_uri(dconf))
 
         elif config.find('trojan://') > -1:
             dconf = get_trojan_dict(config.replace("trojan://", ""))
-            dconf["realName"] = ' '.join((base_remark, dconf["realName"]))
+            dconf["realName"] = ' '.join((base_remark, dconf["realName"], end_remark))
             produced.append("trojan://" + get_trojan_uri(dconf))
 
     return produced

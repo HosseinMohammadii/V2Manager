@@ -31,6 +31,7 @@ class MiddleServer(models.Model):
 
 class Server(models.Model):
     remark = models.CharField(max_length=32, null=True, blank=True)
+    end_remark = models.CharField(max_length=32, null=True, blank=True)
     add = models.CharField(max_length=128, null=True, blank=True)
     host = models.CharField(max_length=128, null=True, blank=True)
     port = models.CharField(max_length=16, default=54321)

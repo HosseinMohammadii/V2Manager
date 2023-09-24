@@ -17,10 +17,10 @@ class SubscriptionConfigMethodsMixin:
         all = []
         for l in self.link_set.filter(include_original=True):
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
-                all += just_rename_configs(l.get_marzban_confs_by_config_id(), l.server.remark)
+                all += just_rename_configs(l.get_marzban_confs_by_config_id(), l.server.remark, l.server.end_remark)
 
             if l.server.panel == PanelTypes.XUI and l.type == LinkTypes.URI:
-                all += just_rename_configs((l.value,), l.server.remark)
+                all += just_rename_configs((l.value,), l.server.remark, l.server.end_remark)
 
         return all
 
