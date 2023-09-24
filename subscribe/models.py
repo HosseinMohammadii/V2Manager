@@ -51,10 +51,11 @@ class Server(models.Model):
 
     def get_mss(self):  # suitable for edit confs functions
         mss = []
+        end_remark = self.end_remark if self.end_remark is not None else ''
         for ms in self.middle_servers.filter(active=True):
             mss.append((ms.address, ms.port, ms.id,
                         ms.vmess_extra_config, ms.vmess_extra_config, ms.trojan_extra_config,
-                        ms.remark, self.remark, ms.apply_on))
+                        ms.remark, self.remark, end_remark, ms.apply_on))
         return mss
 
 

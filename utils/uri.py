@@ -80,7 +80,7 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vmess_" + dconf['net']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, end_remark, apply_on in servers:
                 dconf = get_vmess_dict(conf.replace("vmess://", ""))
                 if not is_applicable(convert_protocol('vmess'), convert_net(dconf['net']), apply_on):
                     continue
@@ -97,13 +97,13 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "vless_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, end_remark, apply_on in servers:
                 dconf = get_vless_dict(conf.replace("vless://", ""))
                 if not is_applicable(convert_protocol('vless'), convert_net(dconf['type']), apply_on):
                     continue
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
+                dconf["realName"] = ' '.join((base_remark, dconf["realName"], end_remark, remark))
                 if vless_ec is not None:
                     dconf.update(vless_ec)
                 added_props.add(prop_key)
@@ -114,13 +114,13 @@ def get_edited_confs(confs: list, servers: list):
             prop_key = "trojan_" + dconf['type']
             if prop_key in added_props:
                 continue
-            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, apply_on in servers:
+            for serv, port, ms_id, vmess_ec, vless_ec, trojan_ec, remark, base_remark, end_remark, apply_on in servers:
                 dconf = get_trojan_dict(conf.replace("trojan://", ""))
                 if not is_applicable(convert_protocol('trojan'), convert_net(dconf['type']), apply_on):
                     continue
                 dconf["add"] = serv
                 dconf["port"] = port
-                dconf["realName"] = ' '.join((base_remark, dconf["realName"], remark))
+                dconf["realName"] = ' '.join((base_remark, dconf["realName"], end_remark, remark))
 
                 if trojan_ec is not None:
                     dconf.update(trojan_ec)
