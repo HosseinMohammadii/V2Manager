@@ -30,7 +30,7 @@ class LinkInline(admin.TabularInline):
     }
 
 
-@admin.action(description="update subs status and action if needed")
+@admin.action(description="Update Subs Status And Action")
 def update_status(modeladmin, request, queryset):
     dis_subs = check_and_disable_subs(queryset)
     msg = ""
@@ -78,13 +78,13 @@ def reset_traffic(modeladmin, request, queryset):
     )
 
 
-@admin.action(description="update ALL subs status and action if needed")
+@admin.action(description="Update all Subs Status And Action")
 def update_status_of_all(modeladmin, request, queryset):
     qs = Subscription.objects.all()
     update_status(modeladmin, request, qs)
 
 
-@admin.action(description="Set One Month From Today")
+@admin.action(description="Set one month From Today")
 def set_expire_date_next_month(modeladmin, request, queryset):
     edited_subs = []
     for sub in queryset:
@@ -120,6 +120,24 @@ def renew(modeladmin, request, queryset):
     )
 
 
+@admin.action(description="Disable")
+def disable(modeladmin, request, queryset):
+    edited_subs = []
+    for sub in queryset:
+        sub.disable()
+        sub.update_status_disable()
+        edited_subs.append(sub)
+    msg = ""
+    for s in edited_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "edited"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
 @admin.register(Subscription)
 class SubscriptionAdmin(ModelAdmin):
     list_display = (
@@ -139,7 +157,8 @@ class SubscriptionAdmin(ModelAdmin):
     )
     search_fields = ['id', 'user_name', 'description']
     inlines = [LinkInline, PaymentInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month]
+    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
+               renew, disable]
 
 
 @admin.register(FastSubscription)
@@ -162,10 +181,12 @@ class FastSubscriptionAdmin(ModelAdmin):
         'last_check_time',
     )
 
+    list_filter = ['status']
+
     # readonly_fields = ('link',)
     inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
-               renew]
+               renew, disable]
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
@@ -182,3 +203,4 @@ class FastSubscriptionAdmin(ModelAdmin):
 @admin.register(MiddleServer)
 class MiddleServerAdmin(ModelAdmin):
     list_display = ('__str__', 'port', 'server_type', 'active')
+    list_editable = ('active',)
