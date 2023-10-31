@@ -19,6 +19,7 @@ from .forms import BaseLoginForm, LoginForm
 
 
 class FirstPage(LoginRequiredMixin, View):
+
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return render(request, "forbidden.html", status=403)
@@ -28,6 +29,7 @@ class FirstPage(LoginRequiredMixin, View):
             return render(request, "forbidden.html", status=403)
         auth_query_string = get_query_string(subs.owner, 'subs')
         confs_url = request.get_full_path()+"confs/"+auth_query_string
+
         return render(request, 'land.html', {'user_name': subs.user_name,
                                              'auth_query_string': auth_query_string,
                                              "confs_url": confs_url})

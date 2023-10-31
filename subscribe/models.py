@@ -5,14 +5,13 @@ from django.conf import settings
 from django.db import models
 
 from django.contrib.auth.models import User
-from persiantools.jdatetime import JalaliDate
 
 from subscribe.constants import LinkTypes, MiddleServerType, PanelTypes, SubscriptionStatuses
 from subscribe.modelMixins import SubscriptionConfigMethodsMixin, SubscriptionTrafficMethodsMixin, \
     SubscriptionActionMethodsMixin
 from utils.cache import get_marzban_cached_token
 from utils.marzban import get_marzban_subs_url
-from utils.uri import get_original_confs_from_subscription, get_vmess_uri
+from utils.uri import get_original_confs_from_subscription
 
 
 class MiddleServer(models.Model):
