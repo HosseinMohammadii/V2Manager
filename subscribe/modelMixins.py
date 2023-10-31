@@ -2,17 +2,31 @@ import base64
 import datetime
 
 from django.utils import timezone
+from persiantools.jdatetime import JalaliDate
 
 from utils.cache import get_marzban_cached_token
 from utils.marzban import get_marzban_traffic_from_api, disable_enable_marzban_config, zero_traffic_marzban_config
 from utils.size import gigabyte_to_megabyte, byte_to_megabyte
-from utils.uri import get_original_confs_from_subscription, get_edited_confs, just_rename_configs
+from utils.uri import get_original_confs_from_subscription, get_edited_confs, just_rename_configs, get_vmess_uri
 from utils.xui import get_xui_traffic, disable_enable_xui_config, zero_traffic_xui_config
 from subscribe.constants import LinkTypes, MiddleServerType, PanelTypes, SubscriptionStatuses
 
 
 class SubscriptionConfigMethodsMixin:
-    @property
+
+    def get_account_info_as_vmess_conf(self):
+        rem_gig = round(self.realtime_remained_megabytes/1024, ndigits=3)
+        jalali_expiredate = JalaliDate(self.expire_date).strftime("%Y/%m/%d") if self.expire_date is not None else "بدون محدودیت زمانی"
+
+        vmess_dict = {'ps': f'باقی مانده: {rem_gig} گیگ تاریخ اتمام: {jalali_expiredate} ',
+                      'add': 'm.c.com', 'port': 2222, 'id': '77',
+                      'net': 'ws',
+                      'type': 'none', 'host': '', 'path': '', 'aid': 0,
+                      'tls': 'none'}
+
+        uri = 'vmess://'+get_vmess_uri(vmess_dict)
+        return uri
+
     def get_original_confs(self) -> list:
         all = []
         for l in self.link_set.filter(include_original=True):
@@ -62,7 +76,8 @@ class SubscriptionConfigMethodsMixin:
         return base64.b64encode('\n'.join(all).encode('ascii'))
 
     def get_all_confs_uri(self):
-        a = self.get_original_confs
+        a = [self.get_account_info_as_vmess_conf()]
+        a = a + self.get_original_confs()
         a = a + self.get_edited_confs()
         return base64.b64encode('\n'.join(a).encode('ascii'))
 
@@ -184,7 +199,7 @@ class SubscriptionActionMethodsMixin:
 
     def set_expire_date_next_month(self):
         d = datetime.date.today()
-        self.expire_date = d.replace(month=d.month+1)
+        self.expire_date = d + datetime.timedelta(days=31)
         self.save()
 
 
