@@ -14,11 +14,9 @@ from subscribe.constants import LinkTypes, MiddleServerType, PanelTypes, Subscri
 
 class SubscriptionConfigMethodsMixin:
 
-    def get_account_info_as_vmess_conf(self):
-        rem_gig = round(self.realtime_remained_megabytes/1024, ndigits=3)
-        jalali_expiredate = JalaliDate(self.expire_date).strftime("%Y/%m/%d") if self.expire_date is not None else "بدون محدودیت زمانی"
+    def get_info_as_vmess_conf(self, text):
 
-        vmess_dict = {'ps': f'باقی مانده: {rem_gig} گیگ تاریخ اتمام: {jalali_expiredate} ',
+        vmess_dict = {'ps': text,
                       'add': 'm.c.com', 'port': 2222, 'id': '77',
                       'net': 'ws',
                       'type': 'none', 'host': '', 'path': '', 'aid': 0,
@@ -76,7 +74,15 @@ class SubscriptionConfigMethodsMixin:
         return base64.b64encode('\n'.join(all).encode('ascii'))
 
     def get_all_confs_uri(self):
-        a = [self.get_account_info_as_vmess_conf()]
+        text = f' اشتراک {self.id}'
+        a = [self.get_info_as_vmess_conf(text)]
+
+        rem_gig = round(self.realtime_remained_megabytes / 1024, ndigits=3)
+        jalali_expiredate = JalaliDate(self.expire_date).strftime(
+            "%Y/%m/%d") if self.expire_date is not None else "بدون محدودیت زمانی"
+        text = f'باقی مانده: {rem_gig} گیگ تاریخ اتمام: {jalali_expiredate} '
+
+        a = a + [self.get_info_as_vmess_conf(text)]
         a = a + self.get_original_confs()
         a = a + self.get_edited_confs()
         return base64.b64encode('\n'.join(a).encode('ascii'))
