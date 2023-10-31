@@ -35,6 +35,17 @@ class FirstPage(LoginRequiredMixin, View):
                                              "confs_url": confs_url})
 
 
+class Dashboard(LoginRequiredMixin, View):
+    raise_exception = False
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, "forbidden.html", status=403)
+        user_id = request.user.id
+        qs = Subscription.objects.filter(owner_id=user_id)
+        return render(request, 'dashboard.html', {'subscriptions': qs})
+
+
 class Info(LoginRequiredMixin, View):
     raise_exception = False
 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div style="text-align: center;">
+
+    <h1>{% if user.is_authenticated %} سلام, {{ user.username }}.{% endif %}</h1>
+    <br><br>
+    <h2>
+        اشتراک های شما به صورت زیر است
+    </h2>
+    <h2>
+        برای دسترسی به هرکدام و دریافت تنظیمات و یا مشاهده اطلاعات روی آن کلیک کنید
+    </h2>
+
+    {% for subscription in subscriptions %}
+        <h2><a href="{{ subscription.link }}">{{ subscription.user_name }}</a> </h2>
+
+    {% endfor %}
+</div>
+</body>
+</html>

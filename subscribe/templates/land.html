@@ -4,6 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ user_name }}</title>
+    <style>
+
+.button {
+  background-color: #04AA6D;
+  border: none;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+}
+.button2 {border-radius: 4px;}
+    </style>
 </head>
 <body>
 
@@ -11,19 +26,25 @@
     {{ user_name }}
 </h1>
 <br><br>
-<div style="text-align: center;"><h2><a href="info/"> اطلاعات حساب شما (کلیک کنید) </a></h2></div>
+<div style="text-align: center;"><h2><a href="info/">
+ <button class="button button2">مشاهده حجم و تاریخ اشتراک</button>
+</a></h2>
+
+</div>
 <br><br>
 <div style="text-align: center;cursor: pointer; direction: rtl; color:  #2874a6 ">
-    <h2>
-        <u><p id="android-confs">دریافت تنظیمات به صورت متن (مناسب برنامه V2RayNG اندروید) (کلیک کنید)</p></u>
+    <h2 id="android-confs">
+        <p>دریافت تنظیمات به صورت خام (مناسب برنامه V2RayNG اندروید)</p>
+        <p>(کلیک کنید)</p>
     </h2>
 </div>
 
 <br>
 
 <div style="text-align: center;cursor: pointer; direction: rtl; color:  #2874a6 ">
-    <h2>
-        <u><p id="iphone-confs"> دریافت لینک سابسکریپشن (Subscription) (برنامه FairVPN آیفون) (برنامه Nekoray ویندوز) (کلیک کنید)</p></u>
+    <h2 id="iphone-confs">
+        <p> دریافت لینک سابسکریپشن (Subscription) (برنامه FairVPN آیفون) (برنامه Nekoray ویندوز) </p>
+        <p>(کلیک کنید)</p>
     </h2>
 </div>
 
