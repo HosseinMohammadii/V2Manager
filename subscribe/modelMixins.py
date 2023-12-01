@@ -194,6 +194,8 @@ class SubscriptionActionMethodsMixin:
                                           l.config_id, "enable")
         self.update_status_active()
 
+
+
     def reset_traffic(self):
         for l in self.link_set.all():
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
@@ -224,3 +226,16 @@ class SubscriptionActionMethodsMixin:
     def update_status_disable(self):
         self.status = SubscriptionStatuses.DISABLED
         self.save()
+
+    def add_last_payment(self):
+        try:
+            last_payment = self.payment_set.order_by('-created').first()
+            if last_payment is None:
+                raise Exception
+            self.payment_set.create(
+                amount=last_payment.amount,
+                description=last_payment.description,
+                done=False,
+            )
+        except Exception as e:
+            pass

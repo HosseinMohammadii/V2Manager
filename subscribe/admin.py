@@ -108,6 +108,7 @@ def renew(modeladmin, request, queryset):
         sub.set_expire_date_next_month()
         sub.reset_traffic()
         sub.enable()
+        sub.add_last_payment()
         edited_subs.append(sub)
     msg = ""
     for s in edited_subs:
@@ -138,6 +139,23 @@ def disable(modeladmin, request, queryset):
     )
 
 
+@admin.action(description="Add Last Payment Again")
+def add_last_payment(modeladmin, request, queryset):
+    edited_subs = []
+    for sub in queryset:
+        sub.add_last_payment()
+        edited_subs.append(sub)
+    msg = ""
+    for s in edited_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "added last payment"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
 @admin.register(Subscription)
 class SubscriptionAdmin(ModelAdmin):
     list_display = (
@@ -158,7 +176,7 @@ class SubscriptionAdmin(ModelAdmin):
     search_fields = ['id', 'user_name', 'description']
     inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
-               renew, disable]
+               renew, disable, add_last_payment]
 
 
 @admin.register(FastSubscription)
@@ -186,7 +204,7 @@ class FastSubscriptionAdmin(ModelAdmin):
     # readonly_fields = ('link',)
     inlines = [LinkInline, PaymentInline]
     actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
-               renew, disable]
+               renew, disable, add_last_payment]
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
