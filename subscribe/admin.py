@@ -161,6 +161,7 @@ class SubscriptionAdmin(ModelAdmin):
     list_display = (
         '__str__',
         'status',
+        'brief_description',
         'remained_days',
         'last_used_traffic',
         'last_check_time',
@@ -182,7 +183,9 @@ class SubscriptionAdmin(ModelAdmin):
 @admin.register(FastSubscription)
 class FastSubscriptionAdmin(ModelAdmin):
     list_display = (
-        '__str__',
+        'id',
+        'user_name',
+        'brief_description',
         # 'link',
         'status',
         'remained_days',
