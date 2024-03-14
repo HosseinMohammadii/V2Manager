@@ -124,4 +124,4 @@ class Subscription(models.Model,
 
     @property
     def brief_description(self):
-        return self.description[:30]
+        return self.description[:30] if self.description is not None else ''
