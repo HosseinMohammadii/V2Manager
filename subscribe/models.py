@@ -40,6 +40,7 @@ class Server(models.Model):
     panel_add = models.URLField(max_length=128, null=True, blank=True)
     username = models.CharField(max_length=16, null=True, blank=True)
     password = models.CharField(max_length=16, null=True, blank=True)
+    operating = models.BooleanField(default=True)
 
     middle_servers = models.ManyToManyField(MiddleServer)
 

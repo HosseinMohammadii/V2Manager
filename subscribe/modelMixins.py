@@ -130,6 +130,9 @@ class SubscriptionTrafficMethodsMixin:
             if link_id(l) in fetched_records:
                 continue
 
+            if not l.server.operating:
+                continue
+
             amount = 0
             if l.server.panel == PanelTypes.MARZBAN and l.type == LinkTypes.BY_CONFIG_ID:
                 amount = get_marzban_traffic_from_api(l.server.panel_add, get_marzban_cached_token(l.server),
