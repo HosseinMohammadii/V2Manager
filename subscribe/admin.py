@@ -6,7 +6,7 @@ from django.forms import Textarea, TextInput, NumberInput
 from payment.admin import PaymentInline
 from utils.size import pretty_megabyte, pretty_byte
 from .models import Subscription, MiddleServer, Link, Server
-from .tasks import check_and_disable_subs
+from .tasks import check_and_disable_subs, update_traffic
 
 
 class FastSubscription(Subscription):
@@ -31,8 +31,22 @@ class LinkInline(admin.TabularInline):
 
 
 @admin.action(description="Update Subs Status And Action")
-def update_status(modeladmin, request, queryset):
+def update_status_and_action(modeladmin, request, queryset):
     dis_subs = check_and_disable_subs(queryset)
+    msg = ""
+    for s in dis_subs:
+        msg += f"  subs id: {s.id} of {s.user_name}  -"
+    msg += "disabled"
+
+    modeladmin.message_user(
+        request,
+        msg,
+    )
+
+
+@admin.action(description="Update Traffic")
+def update_traffic_action(modeladmin, request, queryset):
+    dis_subs = update_traffic(queryset)
     msg = ""
     for s in dis_subs:
         msg += f"  subs id: {s.id} of {s.user_name}  -"
@@ -81,7 +95,7 @@ def reset_traffic(modeladmin, request, queryset):
 @admin.action(description="Update all Subs Status And Action")
 def update_status_of_all(modeladmin, request, queryset):
     qs = Subscription.objects.all()
-    update_status(modeladmin, request, qs)
+    update_status_and_action(modeladmin, request, qs)
 
 
 @admin.action(description="Set one month From Today")
@@ -176,7 +190,7 @@ class SubscriptionAdmin(ModelAdmin):
     )
     search_fields = ['id', 'user_name', 'description']
     inlines = [LinkInline, PaymentInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
+    actions = [update_status_and_action, update_status_of_all, update_traffic_action, enable_all_configs, reset_traffic, set_expire_date_next_month,
                renew, disable, add_last_payment]
 
 
@@ -206,7 +220,7 @@ class FastSubscriptionAdmin(ModelAdmin):
 
     # readonly_fields = ('link',)
     inlines = [LinkInline, PaymentInline]
-    actions = [update_status, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
+    actions = [update_status_and_action, update_traffic_action, update_status_of_all, enable_all_configs, reset_traffic, set_expire_date_next_month,
                renew, disable, add_last_payment]
 
     def get_form(self, request, obj=None, change=False, **kwargs):
