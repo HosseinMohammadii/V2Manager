@@ -19,8 +19,6 @@ def update_traffic(qs):
     disabled_subs = []
     for sub in qs:
         a = sub.realtime_remained_megabytes
-        sub.disable()
-        sub.update_status_dis_traffic()
         disabled_subs.append(sub)
 
     return disabled_subs

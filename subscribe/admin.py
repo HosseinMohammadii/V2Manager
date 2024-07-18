@@ -50,7 +50,7 @@ def update_traffic_action(modeladmin, request, queryset):
     msg = ""
     for s in dis_subs:
         msg += f"  subs id: {s.id} of {s.user_name}  -"
-    msg += "disabled"
+    msg += "updated"
 
     modeladmin.message_user(
         request,
